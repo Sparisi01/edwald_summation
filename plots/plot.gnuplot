@@ -1,0 +1,1 @@
+plot "../output/output.dat" using 1:2 with lines

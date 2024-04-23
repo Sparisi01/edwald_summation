@@ -1,0 +1,3 @@
+double temperature(double* vel){
+    
+}
