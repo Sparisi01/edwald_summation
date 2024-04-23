@@ -1,1 +1,1 @@
-plot "../output/output.dat" using 1:2 with lines
+plot "../output/output.dat" using 3:4 with lines, "" using 9:10 with lines

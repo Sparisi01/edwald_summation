@@ -2,12 +2,12 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "constants.h"
 #include "edwald_summation.h"
+#include "thermodinamics.h"
 #include "verlet_propagation.h"
 
 using namespace std;
-
-#define N_PARTICLE 1
 
 double* forza_elastica(double t, double* pos, double* vel, int n_particles, double* args, int n_args) {
     double* new_forces = (double*)calloc(n_particles * 3, sizeof(double));
@@ -25,18 +25,18 @@ double* forza_elastica(double t, double* pos, double* vel, int n_particles, doub
 }
 
 int main(int argc, char const* argv[]) {
-    double* pos_array = (double*)calloc(N_PARTICLE * 3, sizeof(double));
-    double* vel_array = (double*)calloc(N_PARTICLE * 3, sizeof(double));
+    double* pos_array = (double*)calloc(N_PARTICLES * 3, sizeof(double));
+    double* vel_array = (double*)calloc(N_PARTICLES * 3, sizeof(double));
     double** forces_array_ptr = (double**)malloc(sizeof(double*));
-    *forces_array_ptr = (double*)calloc(N_PARTICLE * 3, sizeof(double));
-    double* masses_array = (double*)calloc(N_PARTICLE, sizeof(double));
+    *forces_array_ptr = (double*)calloc(N_PARTICLES * 3, sizeof(double));
+    double* masses_array = (double*)calloc(N_PARTICLES, sizeof(double));
 
     if (!pos_array || !vel_array || !forces_array_ptr || !*forces_array_ptr || !masses_array) {
         printf("Errore inizializzazione array\n");
         return 1;
     }
 
-    for (size_t i = 0; i < N_PARTICLE; i++) {
+    for (size_t i = 0; i < N_PARTICLES; i++) {
         masses_array[i] = 1;
     }
 
@@ -51,16 +51,29 @@ int main(int argc, char const* argv[]) {
     const double DELTA_T = 1e-3;
     const int N_STEPS = (TIME_END - TIME_IN) / DELTA_T;
 
-    // Init
-    pos_array[0] = 50;
+    //! BRUTE FORCE INIT ------------
+    pos_array[0] = 0;
+    pos_array[1] = 0.04;
+    pos_array[3] = 0;
+    pos_array[4] = -0.04;
+    //! -----------------------------
+
     for (size_t i = 0; i < N_STEPS; i++) {
         double cur_t = TIME_IN + i * DELTA_T;
-        int result = verletPropagationStep(pos_array, vel_array, forces_array_ptr, masses_array, N_PARTICLE, cur_t, DELTA_T, forza_elastica);
+        int result = verletPropagationStep(pos_array, vel_array, forces_array_ptr, masses_array, N_PARTICLES, cur_t, DELTA_T, edwald_summation);
         if (result) {
             printf("Errore verlet propagation:\nIndice: %d\nCur_time: %lf\n", i, cur_t);
             return 1;
         }
-        fprintf(output_file, "%lf %lf %lf %lf\n", cur_t, pos_array[0], pos_array[1], pos_array[2]);
+
+        fprintf(output_file, "%lf\t", cur_t);
+        for (size_t j = 0; j < N_PARTICLES * 3; j += 3) {
+            fprintf(output_file, "%lf %lf %lf ", pos_array[j + 0], pos_array[j + 1], pos_array[j + 2]);
+            fprintf(output_file, "%lf %lf %lf ", vel_array[j + 0], vel_array[j + 1], vel_array[j + 2]);
+        }
+        fprintf(output_file, "\n");
+
+        printf("ENERGIA TOTALE: %lf a tempo %lf\n", kinetic_energy(vel_array, masses_array, N_PARTICLES) + coulomb_potential_energy(pos_array, N_PARTICLES), cur_t);
     }
 
     free(pos_array);
