@@ -9,6 +9,12 @@
 
 using namespace std;
 
+/* TODO:
+[] RICERCA SIGMA SENSATO
+[] VERIFICA SISTEMI NOTI
+[] CUTOF POTENZIALE
+*/
+
 double* forza_elastica(double t, double* pos, double* vel, int n_particles, double* args, int n_args) {
     double* new_forces = (double*)calloc(n_particles * 3, sizeof(double));
     if (!new_forces) {

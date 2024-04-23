@@ -27,12 +27,12 @@ double* edwald_summation(double t, double* pos, double* vel, int n_particles, do
     double q2 = 10;
     double V = pow(L, 3);
     double sigma = 1e-1;
-    int k_range = 0;
+    int n_k_range = 0;
     int n = 1;
 
     // Riporta tutte le particelle nella cella (0,0,0)
     restore_lattice_first_cell(pos, n_particles);
-
+    
     for (size_t i = 0; i < n_particles * 3; i += 3) {
         // TERMINE SPAZIO REALE
 
@@ -46,15 +46,16 @@ double* edwald_summation(double t, double* pos, double* vel, int n_particles, do
             double f_vec_mag = sqrt(pow(f_vec[0], 2) + pow(f_vec[1], 2) + pow(f_vec[2], 2));
             double classical_force = q1 * q2 / (4 * PI * E0 * pow(f_vec_mag, 3));
             double edwald_correction = SQ2 / sqrt(sigma * PI) * exp(-pow(f_vec_mag / sigma, 2) / 2) * f_vec_mag + erfc(f_vec_mag / (sigma * SQ2));
+
             forces[i + 0] += f_vec[0] * classical_force * edwald_correction;
             forces[i + 1] += f_vec[1] * classical_force * edwald_correction;
             forces[i + 2] += f_vec[2] * classical_force * edwald_correction;
         }
 
         // TERMINE SPAZIO RECIPROCO
-        for (int n_k_x = -k_range; n_k_x < k_range; n_k_x++) {
-            for (int n_k_y = -k_range; n_k_y < k_range; n_k_y++) {
-                for (int n_k_z = -k_range; n_k_z < k_range; n_k_z++) {
+        for (int n_k_x = -n_k_range; n_k_x < n_k_range; n_k_x++) {
+            for (int n_k_y = -n_k_range; n_k_y < n_k_range; n_k_y++) {
+                for (int n_k_z = -n_k_range; n_k_z < n_k_range; n_k_z++) {
                     if (n_k_x != 0 && n_k_y != 0 && n_k_z != 0) {
                         // Rimuovo la componente k = 0  che va analizzata separatamente
                         double k_x = n_k_x * 2 * PI / L;  // Componente x vettore spazione reciproco
