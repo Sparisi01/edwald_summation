@@ -23,11 +23,11 @@ double* edwald_summation(double t, double* pos, double* vel, int n_particles, do
         return NULL;
     }
 
-    double q1 = 0.1;
-    double q2 = 0.1;
+    double q1 = 10;
+    double q2 = 10;
     double V = pow(L, 3);
-    double sigma = 0.0001;
-    int k_range = 1;
+    double sigma = 1e-1;
+    int k_range = 0;
     int n = 1;
 
     // Riporta tutte le particelle nella cella (0,0,0)
@@ -46,24 +46,28 @@ double* edwald_summation(double t, double* pos, double* vel, int n_particles, do
             double f_vec_mag = sqrt(pow(f_vec[0], 2) + pow(f_vec[1], 2) + pow(f_vec[2], 2));
             double classical_force = q1 * q2 / (4 * PI * E0 * pow(f_vec_mag, 3));
             double edwald_correction = SQ2 / sqrt(sigma * PI) * exp(-pow(f_vec_mag / sigma, 2) / 2) * f_vec_mag + erfc(f_vec_mag / (sigma * SQ2));
-            forces[j + 0] -= f_vec[0] * classical_force * edwald_correction;
-            forces[j + 1] -= f_vec[1] * classical_force * edwald_correction;
-            forces[j + 2] -= f_vec[2] * classical_force * edwald_correction;
+            forces[i + 0] += f_vec[0] * classical_force * edwald_correction;
+            forces[i + 1] += f_vec[1] * classical_force * edwald_correction;
+            forces[i + 2] += f_vec[2] * classical_force * edwald_correction;
         }
 
         // TERMINE SPAZIO RECIPROCO
-        for (int k_x = -k_range; k_x < k_range; k_x++) {
-            for (int k_y = -k_range; k_y < k_range; k_y++) {
-                for (int k_z = -k_range; k_z < k_range; k_z++) {
-                    if (k_x != 0 && k_y != 0 && k_z != 0) {  // Rimuovo la componente k = 0  che va analizzata separatamente
+        for (int n_k_x = -k_range; n_k_x < k_range; n_k_x++) {
+            for (int n_k_y = -k_range; n_k_y < k_range; n_k_y++) {
+                for (int n_k_z = -k_range; n_k_z < k_range; n_k_z++) {
+                    if (n_k_x != 0 && n_k_y != 0 && n_k_z != 0) {
+                        // Rimuovo la componente k = 0  che va analizzata separatamente
+                        double k_x = n_k_x * 2 * PI / L;  // Componente x vettore spazione reciproco
+                        double k_y = n_k_y * 2 * PI / L;  // Componente y vettore spazione reciproco
+                        double k_z = n_k_z * 2 * PI / L;  // Componente z vettore spazione reciproco
                         for (size_t j = 0; j < n_particles * 3; j += 3) {
                             if (i == j) continue;
-                            double k_vec_mag_square = (k_x * k_x + k_y * k_y + k_z * k_z) * 4 * PI * PI / L / L;
-                            double k_vec_pos_dot_prod = (k_x * (pos[i + 0] - pos[j + 0]) + k_y * (pos[i + 1] - pos[j + 1]) + k_z * (pos[i + 2] - pos[j + 2])) * 2 * PI / L;
+                            double k_vec_mag_square = (k_x * k_x + k_y * k_y + k_z * k_z);
+                            double k_vec_pos_dot_prod = (k_x * (pos[i + 0] - pos[j + 0]) + k_y * (pos[i + 1] - pos[j + 1]) + k_z * (pos[i + 2] - pos[j + 2]));
                             double f_vec_mag = q1 * q2 / (V * E0) * exp(-sigma * sigma * k_vec_mag_square / 2) / k_vec_mag_square * sin(k_vec_pos_dot_prod);
-                            forces[j + 0] -= k_x * 2 * PI / L * f_vec_mag;
-                            forces[j + 1] -= k_y * 2 * PI / L * f_vec_mag;
-                            forces[j + 2] -= k_z * 2 * PI / L * f_vec_mag;
+                            forces[i + 0] += k_x * f_vec_mag;
+                            forces[i + 1] += k_y * f_vec_mag;
+                            forces[i + 2] += k_z * f_vec_mag;
                         }
                     }
                 }

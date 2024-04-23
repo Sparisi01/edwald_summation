@@ -47,15 +47,15 @@ int main(int argc, char const* argv[]) {
     }
 
     const double TIME_IN = 0;
-    const double TIME_END = 10;
+    const double TIME_END = 100;
     const double DELTA_T = 1e-3;
     const int N_STEPS = (TIME_END - TIME_IN) / DELTA_T;
 
     //! BRUTE FORCE INIT ------------
     pos_array[0] = 0;
-    pos_array[1] = 0.04;
+    pos_array[1] = 0.01;
     pos_array[3] = 0;
-    pos_array[4] = -0.04;
+    pos_array[4] = -0.01;
     //! -----------------------------
 
     for (size_t i = 0; i < N_STEPS; i++) {
@@ -66,14 +66,14 @@ int main(int argc, char const* argv[]) {
             return 1;
         }
 
-        fprintf(output_file, "%lf\t", cur_t);
+        fprintf(output_file, "%lf ", cur_t);
         for (size_t j = 0; j < N_PARTICLES * 3; j += 3) {
             fprintf(output_file, "%lf %lf %lf ", pos_array[j + 0], pos_array[j + 1], pos_array[j + 2]);
             fprintf(output_file, "%lf %lf %lf ", vel_array[j + 0], vel_array[j + 1], vel_array[j + 2]);
         }
         fprintf(output_file, "\n");
 
-        printf("ENERGIA TOTALE: %lf a tempo %lf\n", kinetic_energy(vel_array, masses_array, N_PARTICLES) + coulomb_potential_energy(pos_array, N_PARTICLES), cur_t);
+        // printf("ENERGIA TOTALE: %lf a tempo %lf\n", kinetic_energy(vel_array, masses_array, N_PARTICLES) + coulomb_potential_energy(pos_array, N_PARTICLES), cur_t);
     }
 
     free(pos_array);
