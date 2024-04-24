@@ -24,9 +24,9 @@ double* edwald_summation(double t, double* pos, double* vel, int n_particles, do
 
     for (size_t i = 0; i < n_particles * 3; i += 3) {
         // TERMINE SPAZIO REALE
-        ///////////////////////////////////////////////////////////////////////////////////////////L
-        for (int n_x = -N_SPACE_RANGE; i <= N_SPACE_RANGE; n_x++) {
-            for (int n_y = -N_SPACE_RANGE; i <= N_SPACE_RANGE; n_y++) {
+        ///////////////////////////////////////////////////////////////////////////////////////////
+        for (int n_x = -N_SPACE_RANGE; n_x <= N_SPACE_RANGE; n_x++) {
+            for (int n_y = -N_SPACE_RANGE; n_y <= N_SPACE_RANGE; n_y++) {
                 for (int n_z = -N_SPACE_RANGE; n_z <= N_SPACE_RANGE; n_z++) {
                     for (size_t j = 0; j < n_particles * 3; j += 3) {
                         if (n_x == 0 && n_y == 0 && n_z == 0 && i == j) {
