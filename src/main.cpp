@@ -7,13 +7,14 @@
 #include "thermodinamics.h"
 #include "verlet_propagation.h"
 
-using namespace std;
+// using namespace std;
 
-/* TODO:
-[] RICERCA SIGMA SENSATO
-[] VERIFICA SISTEMI NOTI
-[] CUTOF POTENZIALE
-*/
+/**
+ * TODO: main todo
+ * [] RICERCA SIGMA SENSATO
+ * [] VERIFICA SISTEMI NOTI
+ * [] CUTOF POTENZIALE
+ */
 
 double* forza_elastica(double t, double* pos, double* vel, int n_particles, double* args, int n_args) {
     double* new_forces = (double*)calloc(n_particles * 3, sizeof(double));
@@ -53,15 +54,15 @@ int main(int argc, char const* argv[]) {
     }
 
     const double TIME_IN = 0;
-    const double TIME_END = 100;
+    const double TIME_END = 1;
     const double DELTA_T = 1e-3;
     const int N_STEPS = (TIME_END - TIME_IN) / DELTA_T;
 
     //! BRUTE FORCE INIT ------------
     pos_array[0] = 0;
-    pos_array[1] = 0.01;
+    pos_array[1] = 0.1;
     pos_array[3] = 0;
-    pos_array[4] = -0.01;
+    pos_array[4] = -0.1;
     //! -----------------------------
 
     for (size_t i = 0; i < N_STEPS; i++) {
@@ -79,7 +80,7 @@ int main(int argc, char const* argv[]) {
         }
         fprintf(output_file, "\n");
 
-        // printf("ENERGIA TOTALE: %lf a tempo %lf\n", kinetic_energy(vel_array, masses_array, N_PARTICLES) + coulomb_potential_energy(pos_array, N_PARTICLES), cur_t);
+        printf("ENERGIA TOTALE: %lf a tempo %lf\n", kinetic_energy(vel_array, masses_array, N_PARTICLES) + coulomb_potential_energy(pos_array, N_PARTICLES), cur_t);
     }
 
     free(pos_array);
