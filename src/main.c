@@ -57,6 +57,18 @@ int main(int argc, char const *argv[]) {
     return 1;
   }
 
+  // SECTION - erfc speed test
+
+  clock_t start = clock();
+  for (size_t i = 0; i < N_PARTICLES; i++) {
+    for (size_t j = 0; j < N_PARTICLES; j++) {
+      double x = exp(i + j);
+    }
+  }
+  clock_t end = clock();
+  double time_spent = (double)(end - start) / CLOCKS_PER_SEC;
+  printf("Erf time: %lf ms\n", time_spent * 1000);
+
   const double TIME_IN = 0;
   const double TIME_END = 1;
   const double DELTA_T = 1e-3;
@@ -73,9 +85,7 @@ int main(int argc, char const *argv[]) {
 
   for (size_t i = 0; i < N_STEPS; i++) {
     double cur_t = TIME_IN + i * DELTA_T;
-
-    clock_t begin = clock();
-
+    clock_t start = clock();
     int result = verletPropagationStep(pos_array, vel_array, forces_array_ptr, masses_array, N_PARTICLES, cur_t, DELTA_T, edwald_summation, NULL, 0);
     if (result) {
       printf("Errore verlet propagation:\nIndice: %d\nCur_time: %lf\n", i, cur_t);
@@ -83,8 +93,8 @@ int main(int argc, char const *argv[]) {
     }
 
     clock_t end = clock();
-    double time_spent = (double)(end - begin) / CLOCKS_PER_SEC;
-    printf("%lf ms\n", time_spent * 1000);
+    double time_spent = (double)(end - start);
+    printf("Erf time: %lf ms\n", time_spent);
 
     // printf("ENERGIA TOTALE: %lf a tempo %lf\n", kinetic_energy(vel_array, masses_array, N_PARTICLES) + coulomb_potential_energy(pos_array, N_PARTICLES), cur_t);
   }
