@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 
 #include "constants.h"
 #include "edwald_summation.h"
@@ -64,29 +65,28 @@ int main(int argc, char const *argv[]) {
   // BRUTE FORCE INIT ------------
   // NOTE: non tiene conto della possibilità di due particelle sovrapposte
   for (size_t i = 0; i < N_PARTICLES * 3; i += 3) {
-    pos_array[i + 0] = rand() / (RAND_MAX + 1.0) * L;
-    pos_array[i + 1] = rand() / (RAND_MAX + 1.0) * L;
-    pos_array[i + 2] = rand() / (RAND_MAX + 1.0) * L;
+    pos_array[i + 0] = rand() / (RAND_MAX + 1.0) * CELL_L;
+    pos_array[i + 1] = rand() / (RAND_MAX + 1.0) * CELL_L;
+    pos_array[i + 2] = rand() / (RAND_MAX + 1.0) * CELL_L;
   }
   // -----------------------------
 
   for (size_t i = 0; i < N_STEPS; i++) {
     double cur_t = TIME_IN + i * DELTA_T;
 
-    fprintf(output_file, "%lf ", cur_t);
-    for (size_t j = 0; j < N_PARTICLES * 3; j += 3) {
-      fprintf(output_file, "%lf %lf %lf ", pos_array[j + 0], pos_array[j + 1], pos_array[j + 2]);
-      fprintf(output_file, "%lf %lf %lf ", vel_array[j + 0], vel_array[j + 1], vel_array[j + 2]);
-    }
-    fprintf(output_file, "\n");
+    clock_t begin = clock();
 
-    int result = verletPropagationStep(pos_array, vel_array, forces_array_ptr, masses_array, N_PARTICLES, cur_t, DELTA_T, edwald_summation);
+    int result = verletPropagationStep(pos_array, vel_array, forces_array_ptr, masses_array, N_PARTICLES, cur_t, DELTA_T, edwald_summation, NULL, 0);
     if (result) {
       printf("Errore verlet propagation:\nIndice: %d\nCur_time: %lf\n", i, cur_t);
       return 1;
     }
 
-    printf("ENERGIA TOTALE: %lf a tempo %lf\n", kinetic_energy(vel_array, masses_array, N_PARTICLES) + coulomb_potential_energy(pos_array, N_PARTICLES), cur_t);
+    clock_t end = clock();
+    double time_spent = (double)(end - begin) / CLOCKS_PER_SEC;
+    printf("%lf ms\n", time_spent * 1000);
+
+    // printf("ENERGIA TOTALE: %lf a tempo %lf\n", kinetic_energy(vel_array, masses_array, N_PARTICLES) + coulomb_potential_energy(pos_array, N_PARTICLES), cur_t);
   }
 
   free(pos_array);
