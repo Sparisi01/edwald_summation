@@ -17,20 +17,21 @@
  * [] CUTOF POTENZIALE
  */
 
-double *
-forza_elastica(double t, double *pos, double *vel, int n_particles, double *args, int n_args) {
-  double *new_forces = (double *)calloc(n_particles * 3, sizeof(double));
-  if (!new_forces) {
-    return NULL;
+int generateErfcTable(double in, double fin, double precision, FILE *tableFile) {
+  if (!tableFile) {
+    return 1;
   }
 
-  for (size_t i = 0; i < n_particles; i += 3) {
-    new_forces[i + 0] = -5 * pos[i];
-    new_forces[i + 1] = 0;
-    new_forces[i + 2] = 0;
+  double N = (fin - in) / precision;
+  for (size_t i = 0; i < N; i++) {
+    fprintf(tableFile, "%lf", erfc(in + i * precision));
   }
 
-  return new_forces;
+  return 0;
+}
+
+int loadErfcTable(double in, double fin, double interval, FILE *tableFile) {
+  return 1;
 }
 
 int main(int argc, char const *argv[]) {
@@ -57,7 +58,18 @@ int main(int argc, char const *argv[]) {
     return 1;
   }
 
-  // SECTION - erfc speed test
+  if (1) {
+    printf("ErfcTable generation started\n");
+    FILE *tableErfcFile = fopen("../output/erfc_table.dat", "w");
+    if (!tableErfcFile) {
+      printf("Errore inizializzazione file\n");
+      return 1;
+    }
+    generateErfcTable(ERFC_TABLE_IN, ERFC_TABLE_FIN, ERFC_TABLE_PRECISION, tableErfcFile);
+    printf("ErfcTable generation completetd\n");
+  }
+
+  // NOTE - erfc speed test
 
   clock_t start = clock();
   for (size_t i = 0; i < N_PARTICLES; i++) {
@@ -81,6 +93,7 @@ int main(int argc, char const *argv[]) {
     pos_array[i + 1] = rand() / (RAND_MAX + 1.0) * CELL_L;
     pos_array[i + 2] = rand() / (RAND_MAX + 1.0) * CELL_L;
   }
+
   // -----------------------------
 
   for (size_t i = 0; i < N_STEPS; i++) {
@@ -94,7 +107,7 @@ int main(int argc, char const *argv[]) {
 
     clock_t end = clock();
     double time_spent = (double)(end - start);
-    printf("Erf time: %lf ms\n", time_spent);
+    printf("Verlet time: %lf ms\n", time_spent);
 
     // printf("ENERGIA TOTALE: %lf a tempo %lf\n", kinetic_energy(vel_array, masses_array, N_PARTICLES) + coulomb_potential_energy(pos_array, N_PARTICLES), cur_t);
   }
