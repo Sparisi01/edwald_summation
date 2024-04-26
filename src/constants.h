@@ -7,9 +7,10 @@
 #define N_PARTICLES 10000                    //
 #define SIGMA (CELL_L / 2 * SQR_PI)          // STD deviation of density correction to point particle
 #define ALPHA 1 / (SQR_2 * SIGMA)            //
-#define N_K_RANGE 0                          // Range of reciprocal lattice cell computed
+#define N_K_RANGE 1                         // Range of reciprocal lattice cell computed
 #define FORCE_TYPE_CONSTANT 1                // F = FORCE_TYPE_CONSTANT * (Q1*Q2)/r^2
 #define ERFC_TABLE_IN 0                      // Start value erf table generator
 #define ERFC_TABLE_FIN ALPHA* CELL_L* SQR_3  // End value erf table generator
 #define ERFC_TABLE_PRECISION 1E-5            //
 #define SEED 1                               // Seed rand() function, made for replicate the same system N times
+#define Q 10

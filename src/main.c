@@ -14,7 +14,7 @@
  * TODO: main todo
  * [] RICERCA SIGMA SENSATO
  * [] VERIFICA SISTEMI NOTI
- * [] CUTOF POTENZIALE
+ * [x] CUTOF POTENZIALE
  */
 
 int generateErfcTable(double in, double fin, double precision, FILE* tableFile) {
@@ -57,8 +57,9 @@ int main(int argc, char const* argv[]) {
     double** forces_array_ptr = (double**)malloc(sizeof(double*));
     *forces_array_ptr = (double*)calloc(N_PARTICLES * 3, sizeof(double));
     double* masses_array = (double*)calloc(N_PARTICLES, sizeof(double));
+    double* force_charge_array = (double*)calloc(N_PARTICLES, sizeof(double));
 
-    if (!pos_array || !vel_array || !forces_array_ptr || !*forces_array_ptr || !masses_array) {
+    if (!pos_array || !vel_array || !forces_array_ptr || !*forces_array_ptr || !masses_array || !force_charge_array) {
         printf("Errore inizializzazione array\n");
         exit(EXIT_FAILURE);
     }
@@ -94,19 +95,6 @@ int main(int argc, char const* argv[]) {
     }
     fclose(tableErfcFile);
     printf("Erfc table loaded");
-    if (1)
-        return;
-    // NOTE - erfc speed test
-
-    clock_t start = clock();
-    for (size_t i = 0; i < N_PARTICLES; i++) {
-        for (size_t j = 0; j < N_PARTICLES; j++) {
-            double x = exp(i + j);
-        }
-    }
-    clock_t end = clock();
-    double time_spent = (double)(end - start) / CLOCKS_PER_SEC;
-    printf("Erf time: %lf ms\n", time_spent * 1000);
 
     const double TIME_IN = 0;
     const double TIME_END = 1;
@@ -119,6 +107,7 @@ int main(int argc, char const* argv[]) {
         pos_array[i + 0] = rand() / (RAND_MAX + 1.0) * CELL_L;
         pos_array[i + 1] = rand() / (RAND_MAX + 1.0) * CELL_L;
         pos_array[i + 2] = rand() / (RAND_MAX + 1.0) * CELL_L;
+        force_charge_array[i / 3] = Q;
     }
 
     // -----------------------------
@@ -126,8 +115,8 @@ int main(int argc, char const* argv[]) {
     for (size_t i = 0; i < N_STEPS; i++) {
         double cur_t = TIME_IN + i * DELTA_T;
         clock_t start = clock();
-        int result = verletPropagationStep(pos_array, vel_array, forces_array_ptr, masses_array, N_PARTICLES, cur_t, DELTA_T, edwald_summation, NULL, 0);
-        // int result = verletPropagationStep(pos_array, vel_array, forces_array_ptr, masses_array, N_PARTICLES, cur_t, DELTA_T, edwald_summation_table, erfcTable, 0);
+        int result = verletPropagationStep(pos_array, vel_array, forces_array_ptr, masses_array, N_PARTICLES, cur_t, DELTA_T, edwald_summation, (void*)force_charge_array);
+        // int result = verletPropagationStep(pos_array, vel_array, forces_array_ptr, masses_array, N_PARTICLES, cur_t, DELTA_T, edwald_summation_table, erfcTable);
         if (result) {
             printf("Errore verlet propagation:\nIndice: %d\nCur_time: %lf\n", i, cur_t);
             exit(EXIT_FAILURE);
@@ -137,7 +126,8 @@ int main(int argc, char const* argv[]) {
         double time_spent = (double)(end - start);
         printf("Verlet time: %lf ms\n", time_spent);
 
-        // printf("ENERGIA TOTALE: %lf a tempo %lf\n", kinetic_energy(vel_array, masses_array, N_PARTICLES) + coulomb_potential_energy(pos_array, N_PARTICLES), cur_t);
+        printf("ENERGIA TOTALE: %lf a tempo %lf\n", kinetic_energy(vel_array, masses_array, N_PARTICLES) + coulomb_potential_energy(pos_array, N_PARTICLES), cur_t);
+        printf("Posizione: %lf %lf %lf \n", pos_array[0], pos_array[1], pos_array[2]);
     }
 
     free(erfcTable);
@@ -146,5 +136,6 @@ int main(int argc, char const* argv[]) {
     free(masses_array);
     free(*forces_array_ptr);
     free(forces_array_ptr);
+    free(force_charge_array);
     exit(EXIT_SUCCESS);
 }

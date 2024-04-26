@@ -1,5 +1,5 @@
 
-int verletPropagationStep(double *pos, double *vel, double **forces_ptr, double *masses, int n_particles, double t, double dt, double *(*F)(double t, double *pos, double *vel, int n_particles, double *args, int n_args), double *args, int n_args) {
+int verletPropagationStep(double *pos, double *vel, double **forces_ptr, double *masses, int n_particles, double t, double dt, double *(*F)(double t, double *pos, double *vel, int n_particles, void *args), void *args) {
     // Aggiorna posizioni
     double *forces = *forces_ptr;
     for (size_t i = 0; i < n_particles * 3; i += 3) {
@@ -9,7 +9,7 @@ int verletPropagationStep(double *pos, double *vel, double **forces_ptr, double 
     }
 
     // Calcola forze agenti sulle particelle
-    double *new_forces = F(t + dt, pos, vel, n_particles, args, n_args);
+    double *new_forces = F(t + dt, pos, vel, n_particles, args);
     if (!new_forces) {
         return 1;
     }
