@@ -22,16 +22,30 @@ int generateErfcTable(double in, double fin, double precision, FILE *tableFile) 
     return 1;
   }
 
-  double N = (fin - in) / precision;
+  int N = (fin - in) / precision;
   for (size_t i = 0; i < N; i++) {
-    fprintf(tableFile, "%lf", erfc(in + i * precision));
+    fprintf(tableFile, "%lf\n", erfc(in + i * precision));
   }
 
   return 0;
 }
 
-int loadErfcTable(double in, double fin, double interval, FILE *tableFile) {
-  return 1;
+double *loadErfcTable(double in, double fin, double precision, FILE *tableFile) {
+  int N = (fin - in) / precision;
+  double *array = (double *)malloc(sizeof(double) * N);
+  if (!array) {
+    return NULL;
+  }
+  if (!tableFile) {
+    return NULL;
+  } else {
+    int m = 0;
+    double next;
+    do {
+      next = fscanf(tableFile, "%lf", &array[m++]);
+    } while (m != N);
+  }
+  return array;
 }
 
 int main(int argc, char const *argv[]) {
@@ -67,7 +81,18 @@ int main(int argc, char const *argv[]) {
     }
     generateErfcTable(ERFC_TABLE_IN, ERFC_TABLE_FIN, ERFC_TABLE_PRECISION, tableErfcFile);
     printf("ErfcTable generation completetd\n");
+    fclose(tableErfcFile);
   }
+
+  // Load ERFC TABLE
+  FILE *tableErfcFile = fopen("../output/erfc_table.dat", "r");
+
+  double *erfcTable = loadErfcTable(ERFC_TABLE_IN, ERFC_TABLE_FIN, ERFC_TABLE_PRECISION, tableErfcFile);
+  if (!erfcTable) {
+    return 1;
+  }
+  fclose(tableErfcFile);
+  printf("Erfc table loaded");
 
   // NOTE - erfc speed test
 
@@ -99,7 +124,8 @@ int main(int argc, char const *argv[]) {
   for (size_t i = 0; i < N_STEPS; i++) {
     double cur_t = TIME_IN + i * DELTA_T;
     clock_t start = clock();
-    int result = verletPropagationStep(pos_array, vel_array, forces_array_ptr, masses_array, N_PARTICLES, cur_t, DELTA_T, edwald_summation, NULL, 0);
+    // int result = verletPropagationStep(pos_array, vel_array, forces_array_ptr, masses_array, N_PARTICLES, cur_t, DELTA_T, edwald_summation, NULL, 0);
+    int result = verletPropagationStep(pos_array, vel_array, forces_array_ptr, masses_array, N_PARTICLES, cur_t, DELTA_T, edwald_summation_table, erfcTable, 0);
     if (result) {
       printf("Errore verlet propagation:\nIndice: %d\nCur_time: %lf\n", i, cur_t);
       return 1;
@@ -112,6 +138,7 @@ int main(int argc, char const *argv[]) {
     // printf("ENERGIA TOTALE: %lf a tempo %lf\n", kinetic_energy(vel_array, masses_array, N_PARTICLES) + coulomb_potential_energy(pos_array, N_PARTICLES), cur_t);
   }
 
+  free(erfcTable);
   free(pos_array);
   free(vel_array);
   free(masses_array);
