@@ -12,9 +12,11 @@
 
 /**
  * TODO: main todo
- * [] RICERCA SIGMA SENSATO
- * [] VERIFICA SISTEMI NOTI
- * [x] CUTOF POTENZIALE
+ * [] RICERCA SIGMA SENSATO.
+ * [] VERIFICA SISTEMI NOTI.
+ * [x] Cutof potenziale.
+ * [] Verificare se è necessario anche per la somma nello spazio
+ * reciproco considerare la coppia di particelle più vicina.
  */
 
 int generateErfcTable(double in, double fin, double precision, FILE* tableFile) {

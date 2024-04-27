@@ -18,14 +18,18 @@ double* edwald_summation(double t, double* pos, double* vel, int n_particles, vo
         return NULL;
     }
 
+    // Array containing particles charges
     double* charge_particle_array = (double*)args;
     // Bring back all the particles in the (0,0,0) cell
     restore_lattice_positions_in_first_cell(pos, n_particles);
 
-    for (size_t i = 0; i < (n_particles - 1) * 3; i += 3) {
+    for (unsigned int i = 0; i < (n_particles - 1) * 3; i += 3) {
         // SECTION - Real space force
-        for (size_t j = i + 3; j < n_particles * 3; j += 3) {
-            // NOTE - all the following variable are coordinate system independet.
+        for (unsigned int j = i + 3; j < n_particles * 3; j += 3) {
+            /**NOTE - all the following variable are coordinate system independet.
+             * NOTE - se applico il cutof del potenziale, fare un ciclo su le celle nello spazio
+             * reale oppure applicare direttamente r_int per trovare la coppia più vicina è equivalente.
+             **/
             double r_ij_x = pos[i + 0] - pos[j + 0] - rint(pos[i + 0] - pos[j + 0] / CELL_L) * CELL_L;  //
             double r_ij_y = pos[i + 1] - pos[j + 1] - rint(pos[i + 1] - pos[j + 1] / CELL_L) * CELL_L;  //
             double r_ij_z = pos[i + 2] - pos[j + 2] - rint(pos[i + 2] - pos[j + 2] / CELL_L) * CELL_L;  //
@@ -67,7 +71,7 @@ double* edwald_summation(double t, double* pos, double* vel, int n_particles, vo
                      * se esse appartengono a celle diverse. Noto però che in questo caso il sin da valore
                      * nullo. Posso escludere l'interazione.
                      **/
-                    for (size_t j = i + 3; j < n_particles * 3; j += 3) {
+                    for (unsigned int j = i + 3; j < n_particles * 3; j += 3) {
                         double k_mag_sq = (k_x * k_x + k_y * k_y + k_z * k_z);  // Magnitude square of reciprocal-lattice vector
                         double dot_prod_pos_k = (k_x * (pos[i + 0] - pos[j + 0]) + k_y * (pos[i + 1] - pos[j + 1]) + k_z * (pos[i + 2] - pos[j + 2]));
                         double f_vec_mag = charge_particle_array[i / 3] * charge_particle_array[j / 3] * 4 * PI / CELL_V * exp(-k_mag_sq / (2 * ALPHA * ALPHA)) / k_mag_sq * sin(dot_prod_pos_k);
