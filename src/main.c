@@ -50,6 +50,15 @@ double* loadErfcTable(double in, double fin, double precision, FILE* tableFile) 
     return array;
 }
 
+int saveParticelsPositions(double* pos, int n_particles, FILE* file) {
+    if (!file) return 1;
+
+    for (size_t i = 0; i < n_particles * 3; i += 3) {
+        fprintf(file, "%lf %lf %lf\n", pos[i + 0], pos[i + 1], pos[i + 2]);
+    }
+    return 0;
+}
+
 int main(int argc, char const* argv[]) {
     // Set Seed for rnd numbers
     srand(SEED);
@@ -70,8 +79,9 @@ int main(int argc, char const* argv[]) {
         masses_array[i] = 1;
     }
 
-    FILE* output_file = fopen("../output/output.dat", "w");
-    if (!output_file) {
+    FILE* start_pos_file = fopen("../output/start_pos.dat", "w");
+    FILE* end_pos_file = fopen("../output/end_pos.dat", "w");
+    if (!start_pos_file || !end_pos_file) {
         printf("Errore inizializzazione file\n");
         exit(EXIT_FAILURE);
     }
@@ -90,33 +100,49 @@ int main(int argc, char const* argv[]) {
 
     // Load ERFC TABLE
     FILE* tableErfcFile = fopen("../output/erfc_table.dat", "r");
+    if (!tableErfcFile) exit(EXIT_FAILURE);
 
     double* erfcTable = loadErfcTable(ERFC_TABLE_IN, ERFC_TABLE_FIN, ERFC_TABLE_PRECISION, tableErfcFile);
     if (!erfcTable) {
         exit(EXIT_FAILURE);
     }
     fclose(tableErfcFile);
-    printf("Erfc table loaded");
+    printf("Erfc table loaded\n");
 
     const double TIME_IN = 0;
-    const double TIME_END = 1;
+    const double TIME_END = 5;
     const double DELTA_T = 1e-3;
     const int N_STEPS = (TIME_END - TIME_IN) / DELTA_T;
 
     // BRUTE FORCE INIT ------------
     // NOTE: non tiene conto della possibilità di due particelle sovrapposte
     for (size_t i = 0; i < N_PARTICLES * 3; i += 3) {
-        pos_array[i + 0] = rand() / (RAND_MAX + 1.0) * CELL_L;
-        pos_array[i + 1] = rand() / (RAND_MAX + 1.0) * CELL_L;
-        pos_array[i + 2] = rand() / (RAND_MAX + 1.0) * CELL_L;
+        pos_array[i + 0] = rand() / (RAND_MAX + 1.0) * CELL_L - CELL_L / 2;
+        pos_array[i + 1] = rand() / (RAND_MAX + 1.0) * CELL_L - CELL_L / 2;
+        pos_array[i + 2] = rand() / (RAND_MAX + 1.0) * CELL_L - CELL_L / 2;
+        ;
         force_charge_array[i / 3] = Q;
     }
 
+    /* pos_array[0 + 0] = 0.3;
+    pos_array[3 + 0] = -0.3;
+    pos_array[6 + 1] = 0.3;
+    pos_array[9 + 1] = -0.3;
+    force_charge_array[0] = Q;
+    force_charge_array[1] = Q;
+    force_charge_array[2] = Q;
+    force_charge_array[3] = Q; */
+
     // -----------------------------
 
+    saveParticelsPositions(pos_array, N_PARTICLES, start_pos_file);
+
+    clock_t start = 0;
+    clock_t end = 0;
     for (size_t i = 0; i < N_STEPS; i++) {
         double cur_t = TIME_IN + i * DELTA_T;
-        clock_t start = clock();
+        if (i == 0) start = clock();
+
         int result = verletPropagationStep(pos_array, vel_array, forces_array_ptr, masses_array, N_PARTICLES, cur_t, DELTA_T, edwald_summation, (void*)force_charge_array);
         // int result = verletPropagationStep(pos_array, vel_array, forces_array_ptr, masses_array, N_PARTICLES, cur_t, DELTA_T, edwald_summation_table, erfcTable);
         if (result) {
@@ -124,13 +150,15 @@ int main(int argc, char const* argv[]) {
             exit(EXIT_FAILURE);
         }
 
-        clock_t end = clock();
-        double time_spent = (double)(end - start);
-        printf("Verlet time: %lf ms\n", time_spent);
+        if (i == 0) {
+            clock_t end = clock();
+            double time_spent = (double)(end - start);
+            printf("Verlet time: %lf ms\nTempo totale stimato: %lf s\n", time_spent, time_spent * N_STEPS / CLOCKS_PER_SEC);
+        }
 
-        printf("ENERGIA TOTALE: %lf a tempo %lf\n", kinetic_energy(vel_array, masses_array, N_PARTICLES) + coulomb_potential_energy(pos_array, N_PARTICLES), cur_t);
-        printf("Posizione: %lf %lf %lf \n", pos_array[0], pos_array[1], pos_array[2]);
+        // printf("ENERGIA TOTALE: %lf a tempo %lf\n", kinetic_energy(vel_array, masses_array, N_PARTICLES) + coulomb_potential_energy(pos_array, N_PARTICLES), cur_t);
     }
+    saveParticelsPositions(pos_array, N_PARTICLES, end_pos_file);
 
     free(erfcTable);
     free(pos_array);
