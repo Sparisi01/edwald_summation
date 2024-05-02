@@ -1,1 +1,0 @@
-plot "../output/output.dat" using 2:3 with lines

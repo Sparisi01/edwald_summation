@@ -20,69 +20,84 @@
  * reciproco considerare la coppia di particelle più vicina.
  */
 
-int generateErfcTable(double in, double fin, double precision, FILE* tableFile) {
-    if (!tableFile) {
+int generateErfcTable(double in, double fin, double precision, FILE *tableFile)
+{
+    if (!tableFile)
+    {
         return 1;
     }
 
     int N = (fin - in) / precision;
-    for (size_t i = 0; i < N; i++) {
+    for (size_t i = 0; i < N; i++)
+    {
         fprintf(tableFile, "%lf\n", erfc(in + i * precision));
     }
 
     return 0;
 }
 
-double* loadErfcTable(double in, double fin, double precision, FILE* tableFile) {
+double *loadErfcTable(double in, double fin, double precision, FILE *tableFile)
+{
     int N = (fin - in) / precision;
-    double* array = (double*)malloc(sizeof(double) * N);
-    if (!array) {
+    double *array = (double *)malloc(sizeof(double) * N);
+    if (!array)
+    {
         return NULL;
     }
-    if (!tableFile) {
+    if (!tableFile)
+    {
         return NULL;
-    } else {
+    }
+    else
+    {
         int m = 0;
         double next;
-        do {
+        do
+        {
             next = fscanf(tableFile, "%lf", &array[m++]);
         } while (m != N);
     }
     return array;
 }
 
-int saveParticelsPositions(double* pos, int n_particles, FILE* file) {
+int saveParticelsPositions(double *pos, int n_particles, FILE *file)
+{
     if (!file) return 1;
 
-    for (size_t i = 0; i < n_particles * 3; i += 3) {
+    for (size_t i = 0; i < n_particles * 3; i += 3)
+    {
         fprintf(file, "%lf %lf %lf\n", pos[i + 0], pos[i + 1], pos[i + 2]);
     }
     return 0;
 }
 
-int main(int argc, char const* argv[]) {
+int main(int argc, char const *argv[])
+{
     // Set Seed for rnd numbers
     srand(SEED);
 
-    double* pos_array = (double*)calloc(N_PARTICLES * 3, sizeof(double));
-    double* vel_array = (double*)calloc(N_PARTICLES * 3, sizeof(double));
-    double** forces_array_ptr = (double**)malloc(sizeof(double*));
-    *forces_array_ptr = (double*)calloc(N_PARTICLES * 3, sizeof(double));
-    double* masses_array = (double*)calloc(N_PARTICLES, sizeof(double));
-    double* force_charge_array = (double*)calloc(N_PARTICLES, sizeof(double));
+    double *pos_array = (double *)calloc(N_PARTICLES * 3, sizeof(double));
+    double *vel_array = (double *)calloc(N_PARTICLES * 3, sizeof(double));
+    double **forces_array_ptr = (double **)malloc(sizeof(double *));
+    *forces_array_ptr = (double *)calloc(N_PARTICLES * 3, sizeof(double));
+    double *masses_array = (double *)calloc(N_PARTICLES, sizeof(double));
+    double *force_charge_array = (double *)calloc(N_PARTICLES, sizeof(double));
 
-    if (!pos_array || !vel_array || !forces_array_ptr || !*forces_array_ptr || !masses_array || !force_charge_array) {
+    if (!pos_array || !vel_array || !forces_array_ptr || !*forces_array_ptr || !masses_array || !force_charge_array)
+    {
         printf("Errore inizializzazione array particelle\n");
         exit(EXIT_FAILURE);
     }
 
-    for (size_t i = 0; i < N_PARTICLES; i++) {
+    for (size_t i = 0; i < N_PARTICLES; i++)
+    {
         masses_array[i] = 1;
     }
 
-    FILE* start_pos_file = fopen("../output/start_pos.dat", "w");
-    FILE* end_pos_file = fopen("../output/end_pos.dat", "w");
-    if (!start_pos_file || !end_pos_file) {
+    FILE *start_pos_file = fopen("../output/start_pos.dat", "w");
+    FILE *end_pos_file = fopen("../output/end_pos.dat", "w");
+    if (!start_pos_file || !end_pos_file)
+    {
         printf("Errore inizializzazione file\n");
         exit(EXIT_FAILURE);
     }
@@ -117,18 +132,20 @@ int main(int argc, char const* argv[]) {
     const int N_STEPS = (TIME_END - TIME_IN) / DELTA_T;
 
     // Energy arrays
-    FILE* file_energy = fopen("../output/energy.dat", "w");
-    double* kinetic_energy_array = (double*)malloc(N_STEPS * sizeof(double));
-    double* potential_energy_array = (double*)malloc(N_STEPS * sizeof(double));
-    double* energy_array = (double*)malloc(N_STEPS * sizeof(double));
-    if (!potential_energy_array || !kinetic_energy_array || !energy_array || !file_energy) {
+    FILE *file_energy = fopen("../output/energy.dat", "w");
+    double *kinetic_energy_array = (double *)malloc(N_STEPS * sizeof(double));
+    double *potential_energy_array = (double *)malloc(N_STEPS * sizeof(double));
+    double *energy_array = (double *)malloc(N_STEPS * sizeof(double));
+    if (!potential_energy_array || !kinetic_energy_array || !energy_array || !file_energy)
+    {
         printf("Errore vettori energie\n");
         exit(EXIT_FAILURE);
     }
 
     // BRUTE FORCE INIT ------------
     // NOTE: non tiene conto della possibilità di due particelle sovrapposte
-    for (size_t i = 0; i < N_PARTICLES * 3; i += 3) {
+    for (size_t i = 0; i < N_PARTICLES * 3; i += 3)
+    {
         pos_array[i + 0] = rand() / (RAND_MAX + 1.0) * CELL_L - CELL_L / 2;
         pos_array[i + 1] = rand() / (RAND_MAX + 1.0) * CELL_L - CELL_L / 2;
         pos_array[i + 2] = rand() / (RAND_MAX + 1.0) * CELL_L - CELL_L / 2;
@@ -146,43 +163,51 @@ int main(int argc, char const* argv[]) {
 
     // -----------------------------
 
-    saveParticelsPositions(pos_array, N_PARTICLES, start_pos_file);
+    saveParticelsPositions(pos_array, N_PARTICLES, start_pos_file); // Save particles starting position
 
     clock_t start = 0;
     clock_t end = 0;
-    for (size_t i = 0; i < N_STEPS; i++) {
+    for (size_t i = 0; i < N_STEPS; i++)
+    {
         double cur_t = TIME_IN + i * DELTA_T;
+
+        /** At the first step measure time of a verletPropagationStep.
+         * Multiply this time for N_STEPS in order to estimate the total
+         * computational time.
+         */
         if (i == 0) start = clock();
 
-        int result = verletPropagationStep(pos_array, vel_array, forces_array_ptr, masses_array, N_PARTICLES, cur_t, DELTA_T, edwald_summation, (void*)force_charge_array);
+        int result = verletPropagationStep(pos_array, vel_array, forces_array_ptr, masses_array, N_PARTICLES, cur_t, DELTA_T, edwald_summation, (void *)force_charge_array);
         // int result = verletPropagationStep(pos_array, vel_array, forces_array_ptr, masses_array, N_PARTICLES, cur_t, DELTA_T, edwald_summation_table, erfcTable);
-        if (result) {
+        if (result)
+        {
             printf("Errore verlet propagation:\nIndice: %d\nCur_time: %lf\n", i, cur_t);
             exit(EXIT_FAILURE);
         }
 
-        if (i == 0) {
+        if (i == 0)
+        {
             clock_t end = clock();
             double time_spent = (double)(end - start);
             int tot_time_sec = time_spent * N_STEPS / CLOCKS_PER_SEC;
-            int sec = tot_time_sec % 60;
-            int min = (tot_time_sec / 60) % 60;
-            int h = tot_time_sec / 3600;
+            int sec = tot_time_sec % 60;        // Estimated time seconds
+            int min = (tot_time_sec / 60) % 60; // Estimated time minutes
+            int h = tot_time_sec / 3600;        // Estimated time hours
             printf("Verlet time: %d ms\nTempo totale stimato: %d:%d:%d [h:m:s]\n", (int)time_spent, h, min, sec);
         }
+
         kinetic_energy_array[i] = kinetic_energy(vel_array, masses_array, N_PARTICLES);
-        potential_energy_array[i] = coulomb_potential_energy(pos_array, force_charge_array, N_PARTICLES);
+        potential_energy_array[i] = potential_energy(pos_array, force_charge_array, N_PARTICLES);
         energy_array[i] = kinetic_energy_array[i] + potential_energy_array[i];
     }
 
-    saveParticelsPositions(pos_array, N_PARTICLES, end_pos_file);
+    saveParticelsPositions(pos_array, N_PARTICLES, end_pos_file); // Save particles final position
 
-    // Save energies in file
-    for (size_t i = 0; i < N_STEPS; i++) {
+    // Save energies in file and print statistics
+    for (size_t i = 0; i < N_STEPS; i++)
+    {
         fprintf(file_energy, "%.10E %.10E %.10E %.10E\n", DELTA_T * i + TIME_IN, energy_array[i], potential_energy_array[i], kinetic_energy_array[i]);
     }
-
-    // Print energy statistic
 
     printf("ENERGY: %.5E ± %.5E \n", mean(energy_array, 0, N_STEPS), stddev(energy_array, 0, N_STEPS));
 
