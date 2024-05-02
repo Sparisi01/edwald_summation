@@ -128,20 +128,20 @@ int main(int argc, char const* argv[]) {
 
     // BRUTE FORCE INIT ------------
     // NOTE: non tiene conto della possibilità di due particelle sovrapposte
-    /* for (size_t i = 0; i < N_PARTICLES * 3; i += 3) {
+    for (size_t i = 0; i < N_PARTICLES * 3; i += 3) {
         pos_array[i + 0] = rand() / (RAND_MAX + 1.0) * CELL_L - CELL_L / 2;
         pos_array[i + 1] = rand() / (RAND_MAX + 1.0) * CELL_L - CELL_L / 2;
         pos_array[i + 2] = rand() / (RAND_MAX + 1.0) * CELL_L - CELL_L / 2;
         force_charge_array[i / 3] = Q;
-    } */
+    }
 
-    pos_array[0 + 0] = 0.3;
+    /* pos_array[0 + 0] = 0.3;
     pos_array[3 + 0] = -0.3;
-    /*   pos_array[6 + 1] = 0.3;
-      pos_array[9 + 1] = -0.3; */
+    pos_array[6 + 1] = 0.3;
+    pos_array[9 + 1] = -0.3;
     force_charge_array[0] = Q;
     force_charge_array[1] = Q;
-    /* force_charge_array[2] = Q;
+    force_charge_array[2] = Q;
     force_charge_array[3] = Q; */
 
     // -----------------------------

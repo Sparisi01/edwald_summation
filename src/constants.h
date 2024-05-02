@@ -4,7 +4,7 @@
 #define SQR_PI 1.77245385091
 #define CELL_L 2                           // Cell length
 #define CELL_V (CELL_L * CELL_L * CELL_L)  // Cell volume
-#define N_PARTICLES 2                      //
+#define N_PARTICLES 300                    //
 // #define SIGMA (CELL_L / 2 * SQR_PI)              // STD deviation of density correction to point particle
 #define SIGMA (1e5)                              // STD deviation of density correction to point particle
 #define ALPHA (1 / (SQR_2 * SIGMA))              //

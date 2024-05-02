@@ -21,21 +21,16 @@ double* edwald_summation(double t, double* pos, double* vel, int n_particles, vo
     // Array containing particles charges
     double* charge_particle_array = (double*)args;
     // Bring back all the particles in the (0,0,0) cell
-    restore_lattice_positions_in_first_cell(pos, n_particles);
+    // restore_lattice_positions_in_first_cell(pos, n_particles);
 
     for (size_t i = 0; i < (n_particles - 1) * 3; i += 3) {
         // SECTION - Real space force
         for (size_t j = i + 3; j < n_particles * 3; j += 3) {
-            /**NOTE - all the following variable are coordinate system independet.
-             * NOTE - se applico il cutof del potenziale, fare un ciclo su le celle nello spazio
-             * reale oppure applicare direttamente r_int per trovare la coppia più vicina è equivalente.
-             **/
+            // NOTE - all the following variable are coordinate system independet.
+
             double r_ij_x = pos[i + 0] - pos[j + 0] - rint((pos[i + 0] - pos[j + 0]) / CELL_L) * CELL_L;  //
             double r_ij_y = pos[i + 1] - pos[j + 1] - rint((pos[i + 1] - pos[j + 1]) / CELL_L) * CELL_L;  //
             double r_ij_z = pos[i + 2] - pos[j + 2] - rint((pos[i + 2] - pos[j + 2]) / CELL_L) * CELL_L;  //
-            // double r_ij_x = pos[i + 0] - pos[j + 0];  //
-            // double r_ij_y = pos[i + 1] - pos[j + 1];  //
-            // double r_ij_z = pos[i + 2] - pos[j + 2];  //
 
             double r_ij = sqrt(r_ij_x * r_ij_x + r_ij_y * r_ij_y + r_ij_z * r_ij_z);  // |r_i - r_j|
 
