@@ -23,21 +23,25 @@ double* edwald_summation(double t, double* pos, double* vel, int n_particles, vo
     // Bring back all the particles in the (0,0,0) cell
     restore_lattice_positions_in_first_cell(pos, n_particles);
 
-    for (unsigned int i = 0; i < (n_particles - 1) * 3; i += 3) {
+    for (size_t i = 0; i < (n_particles - 1) * 3; i += 3) {
         // SECTION - Real space force
-        for (unsigned int j = i + 3; j < n_particles * 3; j += 3) {
+        for (size_t j = i + 3; j < n_particles * 3; j += 3) {
             /**NOTE - all the following variable are coordinate system independet.
              * NOTE - se applico il cutof del potenziale, fare un ciclo su le celle nello spazio
              * reale oppure applicare direttamente r_int per trovare la coppia più vicina è equivalente.
              **/
-            double r_ij_x = pos[i + 0] - pos[j + 0] - rint(pos[i + 0] - pos[j + 0] / CELL_L) * CELL_L;  //
-            double r_ij_y = pos[i + 1] - pos[j + 1] - rint(pos[i + 1] - pos[j + 1] / CELL_L) * CELL_L;  //
-            double r_ij_z = pos[i + 2] - pos[j + 2] - rint(pos[i + 2] - pos[j + 2] / CELL_L) * CELL_L;  //
-            double r_ij = sqrt(r_ij_x * r_ij_x + r_ij_y * r_ij_y + r_ij_z * r_ij_z);                    // |r_i - r_j|
+            double r_ij_x = pos[i + 0] - pos[j + 0] - rint((pos[i + 0] - pos[j + 0]) / CELL_L) * CELL_L;  //
+            double r_ij_y = pos[i + 1] - pos[j + 1] - rint((pos[i + 1] - pos[j + 1]) / CELL_L) * CELL_L;  //
+            double r_ij_z = pos[i + 2] - pos[j + 2] - rint((pos[i + 2] - pos[j + 2]) / CELL_L) * CELL_L;  //
+            // double r_ij_x = pos[i + 0] - pos[j + 0];  //
+            // double r_ij_y = pos[i + 1] - pos[j + 1];  //
+            // double r_ij_z = pos[i + 2] - pos[j + 2];  //
 
-            if (r_ij >= CELL_L / 2) {
+            double r_ij = sqrt(r_ij_x * r_ij_x + r_ij_y * r_ij_y + r_ij_z * r_ij_z);  // |r_i - r_j|
+
+            /* if (r_ij >= CELL_L / 2) {
                 continue;  // CUTOF potential
-            }
+            } */
 
             double classical_force = charge_particle_array[i / 3] * charge_particle_array[j / 3] / (r_ij * r_ij * r_ij);        // Classic Coulomb Like force
             double edwald_correction = 2 * ALPHA / SQR_PI * exp(-(ALPHA * r_ij) * (ALPHA * r_ij)) * r_ij + erfc(ALPHA * r_ij);  // Edwald correction in real space
@@ -59,7 +63,7 @@ double* edwald_summation(double t, double* pos, double* vel, int n_particles, vo
             for (int n_k_y = -N_K_RANGE; n_k_y <= N_K_RANGE; n_k_y++) {
                 for (int n_k_z = -N_K_RANGE; n_k_z <= N_K_RANGE; n_k_z++) {
                     if (n_k_x == 0 && n_k_y == 0 && n_k_z == 0) {
-                        // TODO: implementare spazio reciproco cella 0
+                        // TODO:
                         continue;  // Rimuovo la componente (0,0,0) che va analizzata separatamente
                     }
 
@@ -71,7 +75,7 @@ double* edwald_summation(double t, double* pos, double* vel, int n_particles, vo
                      * se esse appartengono a celle diverse. Noto però che in questo caso il sin da valore
                      * nullo. Posso escludere l'interazione.
                      **/
-                    for (unsigned int j = i + 3; j < n_particles * 3; j += 3) {
+                    for (size_t j = i + 3; j < n_particles * 3; j += 3) {
                         double k_mag_sq = (k_x * k_x + k_y * k_y + k_z * k_z);  // Magnitude square of reciprocal-lattice vector
                         double dot_prod_pos_k = (k_x * (pos[i + 0] - pos[j + 0]) + k_y * (pos[i + 1] - pos[j + 1]) + k_z * (pos[i + 2] - pos[j + 2]));
                         double f_vec_mag = charge_particle_array[i / 3] * charge_particle_array[j / 3] * 4 * PI / CELL_V * exp(-k_mag_sq / (2 * ALPHA * ALPHA)) / k_mag_sq * sin(dot_prod_pos_k);
@@ -113,9 +117,9 @@ double* edwald_summation_table(double t, double* pos, double* vel, int n_particl
             double r_ij_z = pos[i + 2] - pos[j + 2] - rint(pos[i + 2] - pos[j + 2] / CELL_L) * CELL_L;  // Componente z vettore direzione forza
             double r_ij = sqrt(r_ij_x * r_ij_x + r_ij_y * r_ij_y + r_ij_z * r_ij_z);
 
-            if (r_ij >= CELL_L / 2) {
+            /* if (r_ij >= CELL_L / 2) {
                 continue;  // CUTOF potenziale
-            }
+            } */
 
             double curr_erfc = (erfcTable[(int)floor(ALPHA * r_ij / ERFC_TABLE_PRECISION) + 1] + erfcTable[(int)floor(ALPHA * r_ij / ERFC_TABLE_PRECISION)]) / 2;
 
