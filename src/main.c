@@ -83,7 +83,7 @@ int main(int argc, char const *argv[])
 
     if (!pos_array || !vel_array || !forces_array_ptr || !*forces_array_ptr || !masses_array || !force_charge_array)
     {
-        printf("Errore inizializzazione array particelle\n");
+        perror("Error init particles properties arrays: ");
         exit(EXIT_FAILURE);
     }
 
@@ -91,7 +91,7 @@ int main(int argc, char const *argv[])
     FILE *end_pos_file = fopen("../output/end_pos.dat", "w");
     if (!start_pos_file || !end_pos_file)
     {
-        printf("Errore inizializzazione file\n");
+        perror("Error start-end pos file: ");
         exit(EXIT_FAILURE);
     }
 
@@ -131,7 +131,7 @@ int main(int argc, char const *argv[])
     double *energy_array = (double *)malloc(N_STEPS * sizeof(double));
     if (!potential_energy_array || !kinetic_energy_array || !energy_array || !file_energy)
     {
-        printf("Errore vettori energie\n");
+        perror("Error energy array init: ");
         exit(EXIT_FAILURE);
     }
 
@@ -180,7 +180,7 @@ int main(int argc, char const *argv[])
         int result = verletPropagationStep(pos_array, vel_array, forces_array_ptr, masses_array, N_PARTICLES, cur_t, DELTA_T, edwald_summation, (void *)force_charge_array);
         if (result)
         {
-            printf("Errore verlet propagation:\nIndice: %d\nCur_time: %lf\n", i, cur_t);
+            perror("Error in verlet propagation step: ");
             exit(EXIT_FAILURE);
         }
 
