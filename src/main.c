@@ -9,8 +9,6 @@
 #include "thermodinamics.h"
 #include "verlet_propagation.h"
 
-// using namespace std;
-
 /**
  * TODO: main todo
  * [] ricerca sigma sensato.
@@ -89,11 +87,6 @@ int main(int argc, char const *argv[])
         exit(EXIT_FAILURE);
     }
 
-    for (size_t i = 0; i < N_PARTICLES; i++)
-    {
-        masses_array[i] = 1;
-    }
-
     FILE *start_pos_file = fopen("../output/start_pos.dat", "w");
     FILE *end_pos_file = fopen("../output/end_pos.dat", "w");
     if (!start_pos_file || !end_pos_file)
@@ -127,7 +120,7 @@ int main(int argc, char const *argv[])
     printf("Erfc table loaded\n"); */
 
     const double TIME_IN = 0;
-    const double TIME_END = 17;
+    const double TIME_END = 100;
     const double DELTA_T = 1e-3;
     const int N_STEPS = (TIME_END - TIME_IN) / DELTA_T;
 
@@ -142,14 +135,21 @@ int main(int argc, char const *argv[])
         exit(EXIT_FAILURE);
     }
 
-    // BRUTE FORCE INIT ------------
+    // INITIALIZATION ------------
     // NOTE: non tiene conto della possibilità di due particelle sovrapposte
     for (size_t i = 0; i < N_PARTICLES * 3; i += 3)
     {
         pos_array[i + 0] = rand() / (RAND_MAX + 1.0) * CELL_L - CELL_L / 2;
         pos_array[i + 1] = rand() / (RAND_MAX + 1.0) * CELL_L - CELL_L / 2;
         pos_array[i + 2] = rand() / (RAND_MAX + 1.0) * CELL_L - CELL_L / 2;
+
+        vel_array[i + 0] = 0;
+        vel_array[i + 1] = 0;
+        vel_array[i + 2] = 0;
+
         force_charge_array[i / 3] = Q;
+
+        masses_array[i / 3] = 1;
     }
 
     /* pos_array[0 + 0] = 0.3;
@@ -178,12 +178,15 @@ int main(int argc, char const *argv[])
         if (i == 0) start = clock();
 
         int result = verletPropagationStep(pos_array, vel_array, forces_array_ptr, masses_array, N_PARTICLES, cur_t, DELTA_T, edwald_summation, (void *)force_charge_array);
-        // int result = verletPropagationStep(pos_array, vel_array, forces_array_ptr, masses_array, N_PARTICLES, cur_t, DELTA_T, edwald_summation_table, erfcTable);
         if (result)
         {
             printf("Errore verlet propagation:\nIndice: %d\nCur_time: %lf\n", i, cur_t);
             exit(EXIT_FAILURE);
         }
+
+        kinetic_energy_array[i] = kinetic_energy(vel_array, masses_array, N_PARTICLES);
+        potential_energy_array[i] = potential_energy(pos_array, force_charge_array, N_PARTICLES);
+        energy_array[i] = kinetic_energy_array[i] + potential_energy_array[i];
 
         if (i == 0)
         {
@@ -195,10 +198,6 @@ int main(int argc, char const *argv[])
             int h = tot_time_sec / 3600;        // Estimated time hours
             printf("Verlet time: %d ms\nTempo totale stimato: %d:%d:%d [h:m:s]\n", (int)time_spent, h, min, sec);
         }
-
-        kinetic_energy_array[i] = kinetic_energy(vel_array, masses_array, N_PARTICLES);
-        potential_energy_array[i] = potential_energy(pos_array, force_charge_array, N_PARTICLES);
-        energy_array[i] = kinetic_energy_array[i] + potential_energy_array[i];
     }
 
     saveParticelsPositions(pos_array, N_PARTICLES, end_pos_file); // Save particles final position
