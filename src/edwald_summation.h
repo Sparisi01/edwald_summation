@@ -27,6 +27,11 @@ double *edwald_summation(double t, double *pos, double *vel, int n_particles, vo
     // Bring back all the particles in the (0,0,0) cell
     restore_lattice_positions_in_first_cell(pos, n_particles);
 
+    const int SELECTED_PARTICLE = 0;
+    static int r_k_print_countdown = 5;
+    double real_sum = 0;
+    double k_sum = 0;
+
     for (size_t i = 0; i < (n_particles - 1) * 3; i += 3)
     {
         // SECTION - Real space force
@@ -55,6 +60,13 @@ double *edwald_summation(double t, double *pos, double *vel, int n_particles, vo
             forces[j + 0] -= FORCE_TYPE_CONSTANT * r_ij_x * classical_force * edwald_correction;
             forces[j + 1] -= FORCE_TYPE_CONSTANT * r_ij_y * classical_force * edwald_correction;
             forces[j + 2] -= FORCE_TYPE_CONSTANT * r_ij_z * classical_force * edwald_correction;
+
+            if (i / 3 == SELECTED_PARTICLE)
+            {
+                real_sum += FORCE_TYPE_CONSTANT * r_ij_x * classical_force * edwald_correction;
+                real_sum += FORCE_TYPE_CONSTANT * r_ij_y * classical_force * edwald_correction;
+                real_sum += FORCE_TYPE_CONSTANT * r_ij_z * classical_force * edwald_correction;
+            }
         }
 
         /*!SECTION */
@@ -93,11 +105,23 @@ double *edwald_summation(double t, double *pos, double *vel, int n_particles, vo
                         forces[j + 0] -= FORCE_TYPE_CONSTANT * k_x * f_vec_mag;
                         forces[j + 1] -= FORCE_TYPE_CONSTANT * k_y * f_vec_mag;
                         forces[j + 2] -= FORCE_TYPE_CONSTANT * k_z * f_vec_mag;
+
+                        if (i / 3 == SELECTED_PARTICLE)
+                        {
+                            k_sum += FORCE_TYPE_CONSTANT * k_x * f_vec_mag;
+                            k_sum += FORCE_TYPE_CONSTANT * k_y * f_vec_mag;
+                            k_sum += FORCE_TYPE_CONSTANT * k_z * f_vec_mag;
+                        }
                     }
                 }
             }
         }
         /*!SECTION */
+    }
+    if (r_k_print_countdown > 0)
+    {
+        printf("REAL SUM: %.10E\nRECIPROCAL SUM: %.10E\n", real_sum, k_sum);
+        r_k_print_countdown--;
     }
 
     return forces;

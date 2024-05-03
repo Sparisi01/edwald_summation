@@ -163,19 +163,28 @@ int main(int argc, char const *argv[])
 
     // -----------------------------
 
+    printf("----------\n");
+    printf("AVVIO SIMULAZIONE\n");
+    printf("----------\n");
+    printf("N Particelle: %d\n", (int)N_PARTICLES);
+    printf("Dimensione cella: %lf\n", CELL_L);
+    printf("Δt, dt: %lf, %lf\n", TIME_END - TIME_IN, DELTA_T);
+    printf("----------\n");
+
     saveParticelsPositions(pos_array, N_PARTICLES, start_pos_file); // Save particles starting position
 
+    const int count_dow_time_measure = 5;
     clock_t start = 0;
     clock_t end = 0;
     for (size_t i = 0; i < N_STEPS; i++)
     {
         double cur_t = TIME_IN + i * DELTA_T;
 
-        /** At the first step measure time of a verletPropagationStep.
+        /** At the first count_dow_time_measure step measure time of a verletPropagationStep.
          * Multiply this time for N_STEPS in order to estimate the total
          * computational time.
          */
-        if (i == 0) start = clock();
+        if (i < count_dow_time_measure) start += clock();
 
         int result = verletPropagationStep(pos_array, vel_array, forces_array_ptr, masses_array, N_PARTICLES, cur_t, DELTA_T, edwald_summation, (void *)force_charge_array);
         if (result)
@@ -188,15 +197,15 @@ int main(int argc, char const *argv[])
         potential_energy_array[i] = potential_energy(pos_array, force_charge_array, N_PARTICLES);
         energy_array[i] = kinetic_energy_array[i] + potential_energy_array[i];
 
-        if (i == 0)
+        if (i < count_dow_time_measure) end += clock();
+        if (i == count_dow_time_measure - 1)
         {
-            clock_t end = clock();
-            double time_spent = (double)(end - start);
+            double time_spent = (double)(end - start) / count_dow_time_measure;
             int tot_time_sec = time_spent * N_STEPS / CLOCKS_PER_SEC;
             int sec = tot_time_sec % 60;        // Estimated time seconds
             int min = (tot_time_sec / 60) % 60; // Estimated time minutes
             int h = tot_time_sec / 3600;        // Estimated time hours
-            printf("Verlet time: %d ms\nTempo totale stimato: %d:%d:%d [h:m:s]\n", (int)time_spent, h, min, sec);
+            printf("----------\nVerlet time: %d ms\nTempo totale stimato: %d:%d:%d [h:m:s]\n----------\n", (int)time_spent, h, min, sec);
         }
     }
 
