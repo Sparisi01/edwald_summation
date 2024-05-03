@@ -119,11 +119,6 @@ int main(int argc, char const *argv[])
     fclose(tableErfcFile);
     printf("Erfc table loaded\n"); */
 
-    const double TIME_IN = 0;
-    const double TIME_END = 100;
-    const double DELTA_T = 1e-3;
-    const int N_STEPS = (TIME_END - TIME_IN) / DELTA_T;
-
     // Energy arrays
     FILE *file_energy = fopen("../output/energy.dat", "w");
     double *kinetic_energy_array = (double *)malloc(N_STEPS * sizeof(double));
@@ -163,13 +158,13 @@ int main(int argc, char const *argv[])
 
     // -----------------------------
 
-    printf("----------\n");
+    printf("--------------------\n");
     printf("AVVIO SIMULAZIONE\n");
-    printf("----------\n");
+    printf("--------------------\n");
     printf("N Particelle: %d\n", (int)N_PARTICLES);
-    printf("Dimensione cella: %lf\n", CELL_L);
-    printf("Δt, dt: %lf, %lf\n", TIME_END - TIME_IN, DELTA_T);
-    printf("----------\n");
+    printf("Dimensione cella: %lf\n", (double)CELL_L);
+    printf("Δt, dt: %lf, %lf\n", (double)(TIME_END - TIME_IN), (double)DELTA_T);
+    printf("--------------------\n");
 
     saveParticelsPositions(pos_array, N_PARTICLES, start_pos_file); // Save particles starting position
 
@@ -205,7 +200,7 @@ int main(int argc, char const *argv[])
             int sec = tot_time_sec % 60;        // Estimated time seconds
             int min = (tot_time_sec / 60) % 60; // Estimated time minutes
             int h = tot_time_sec / 3600;        // Estimated time hours
-            printf("----------\nVerlet time: %d ms\nTempo totale stimato: %d:%d:%d [h:m:s]\n----------\n", (int)time_spent, h, min, sec);
+            printf("--------------------\nVerlet time: %d ms\nTempo totale stimato: %d:%d:%d [h:m:s]\n--------------------\n", (int)time_spent, h, min, sec);
         }
     }
 
