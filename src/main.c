@@ -1,3 +1,4 @@
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -10,9 +11,8 @@
 #define CELL_LENGHT 2.
 #define CELL_VOLUME (CELL_LENGHT * CELL_LENGHT * CELL_LENGHT)
 #define RAND_SEED 5
-/* #define ALPHA (5.6 / CELL_LENGHT)
-#define SIGMA (1 / (SQR_2 * ALPHA)) */
-#define ALPHA 1e-6
+#define ALPHA (5.6 / CELL_LENGHT)
+#define SIGMA (1 / (SQR_2 * ALPHA))
 #define N_K_RANGE 0
 #define FORCE_TYPE_CONSTANT 1 // F = FORCE_TYPE_CONSTANT * (Q1*Q2)/r^2
 
@@ -60,11 +60,6 @@ int writeParticlesPositions(struct Particle *particles, int n_particles, FILE *f
     return 0;
 }
 
-double temperature(double *vel)
-{
-    return 1;
-}
-
 double kinetic_energy(struct Particle *particles, int n_particles)
 {
     double kinetic_energy = 0;
@@ -110,6 +105,8 @@ int restore_positions_in_lattice_first_cell(struct Particle *particles, int n_pa
 
 struct Vec3 *edwald_summation(struct System *system, double *args)
 {
+    struct Particle *particles = system->particles;
+
     struct Vec3 *tmp_forces = (struct Vec3 *)malloc(system->n_particles * sizeof(struct Vec3));
     if (!tmp_forces)
     {
@@ -124,7 +121,7 @@ struct Vec3 *edwald_summation(struct System *system, double *args)
     }
 
     // Bring back all the particles in the (0,0,0) cell
-    restore_positions_in_lattice_first_cell(system->particles, system->n_particles);
+    restore_positions_in_lattice_first_cell(particles, system->n_particles);
 
     const int SELECTED_PARTICLE = 0;
     static int r_k_print_countdown = 5;
@@ -135,16 +132,16 @@ struct Vec3 *edwald_summation(struct System *system, double *args)
     {
         for (size_t j = i + 1; j < system->n_particles; j++)
         {
-            double r_ij_x = system->particles[i].x - system->particles[j].x - rint((system->particles[i].x - system->particles[j].x) / CELL_LENGHT) * CELL_LENGHT; //
-            double r_ij_y = system->particles[i].y - system->particles[j].y - rint((system->particles[i].y - system->particles[j].y) / CELL_LENGHT) * CELL_LENGHT; //
-            double r_ij_z = system->particles[i].z - system->particles[j].z - rint((system->particles[i].z - system->particles[j].z) / CELL_LENGHT) * CELL_LENGHT; //
-            double r_ij = sqrt(r_ij_x * r_ij_x + r_ij_y * r_ij_y + r_ij_z * r_ij_z);                                                                               // |r_i - r_j|
+            double r_ij_x = particles[i].x - particles[j].x - rint((particles[i].x - particles[j].x) / CELL_LENGHT) * CELL_LENGHT; //
+            double r_ij_y = particles[i].y - particles[j].y - rint((particles[i].y - particles[j].y) / CELL_LENGHT) * CELL_LENGHT; //
+            double r_ij_z = particles[i].z - particles[j].z - rint((particles[i].z - particles[j].z) / CELL_LENGHT) * CELL_LENGHT; //
+            double r_ij = sqrt(r_ij_x * r_ij_x + r_ij_y * r_ij_y + r_ij_z * r_ij_z);                                               // |r_i - r_j|
 
             /* if (r_ij >= CELL_L / 2) {
                 continue;  // CUTOF potential
             } */
 
-            double classical_force = system->particles[i].charge * system->particles[j].charge / (r_ij * r_ij * r_ij);         // Classic Coulomb Like force
+            double classical_force = particles[i].charge * particles[j].charge / (r_ij * r_ij * r_ij);                         // Classic Coulomb Like force
             double edwald_correction = 2 * ALPHA / SQR_PI * exp(-(ALPHA * r_ij) * (ALPHA * r_ij)) * r_ij + erfc(ALPHA * r_ij); // Edwald correction in real space
 
             // Force on particle i due to j
@@ -278,7 +275,7 @@ int main(int argc, char const *argv[])
     }
 
     struct System system;
-    system.n_particles = 4;
+    system.n_particles = 5000;
     system.particles = (struct Particle *)malloc(sizeof(struct Particle) * system.n_particles);
     if (!system.particles)
     {
@@ -288,8 +285,9 @@ int main(int argc, char const *argv[])
 
     //----------------------------------------------
     double start_time = 0;
-    double end_time = 30;
+    double end_time = 10;
     double time_step = 1e-3;
+
     int n_time_step = (end_time - start_time) / time_step;
 
     struct Observables observables;
@@ -333,13 +331,13 @@ int main(int argc, char const *argv[])
 
     for (size_t i = 0; i < system.n_particles; i++)
     {
-        // system.particles[i].x = rand() / (RAND_MAX + 1.0) * CELL_LENGHT - CELL_LENGHT / 2;
-        // system.particles[i].y = rand() / (RAND_MAX + 1.0) * CELL_LENGHT - CELL_LENGHT / 2;
-        // system.particles[i].z = rand() / (RAND_MAX + 1.0) * CELL_LENGHT - CELL_LENGHT / 2;
+        system.particles[i].x = rand() / (RAND_MAX + 1.0) * CELL_LENGHT - CELL_LENGHT / 2;
+        system.particles[i].y = rand() / (RAND_MAX + 1.0) * CELL_LENGHT - CELL_LENGHT / 2;
+        system.particles[i].z = rand() / (RAND_MAX + 1.0) * CELL_LENGHT - CELL_LENGHT / 2;
 
-        system.particles[i].x = 0;
+        /* system.particles[i].x = 0;
         system.particles[i].y = 0;
-        system.particles[i].z = 0;
+        system.particles[i].z = 0; */
 
         system.particles[i].vx = 0;
         system.particles[i].vy = 0;
@@ -349,7 +347,7 @@ int main(int argc, char const *argv[])
         system.particles[i].charge = 0.01;
     }
 
-    system.particles[0].x = 0.3;
+    /* system.particles[0].x = 0.3;
     system.particles[1].x = -0.3;
     system.particles[2].y = 0.3;
     system.particles[3].y = -0.3;
@@ -362,11 +360,7 @@ int main(int argc, char const *argv[])
     system.particles[0].mass = 1;
     system.particles[1].mass = 1;
     system.particles[2].mass = 1;
-    system.particles[3].mass = 1;
-
-    system.forces = edwald_summation(&system, NULL);
-
-    // -----------------------------
+    system.particles[3].mass = 1; */
 
     printf("--------------------\n");
     printf("AVVIO SIMULAZIONE\n");
@@ -376,9 +370,11 @@ int main(int argc, char const *argv[])
     printf("Δt, dt: %lf, %lf\n", end_time - start_time, time_step);
     printf("--------------------\n");
 
+    system.forces = edwald_summation(&system, NULL);
+
     writeParticlesPositions(system.particles, system.n_particles, file_start_particles_pos);
 
-    int n_time_measure = 50;
+    int n_time_measure = 10;
     clock_t comput_time_start = 0;
     clock_t sum_comput_times = 0;
 
@@ -399,8 +395,8 @@ int main(int argc, char const *argv[])
         observables.time[i] = system.time;
         observables.kinetic_energy[i] = kinetic_energy(system.particles, system.n_particles);
         observables.potential_energy[i] = potential_energy(system.particles, system.n_particles);
-        observables.pressure = 0;
-        observables.temperature = 0;
+        observables.temperature[i] = 2. / 3. * observables.kinetic_energy[i] / system.n_particles;
+        observables.pressure[i] = 0;
 
         if (i < n_time_measure)
         {
@@ -422,7 +418,12 @@ int main(int argc, char const *argv[])
     // Save energies in file and print statistics
     for (size_t i = 0; i < n_time_step; i++)
     {
-        fprintf(file_thermodinamic, "%.10E %.10E %.10E %.10E\n", start_time + i * time_step, observables.kinetic_energy[i] + observables.potential_energy[i], observables.kinetic_energy[i], observables.potential_energy[i]);
+        fprintf(file_thermodinamic, "%.10E %.10E %.10E %.10E %.10E %.10E\n",
+                start_time + i * time_step,
+                observables.kinetic_energy[i] + observables.potential_energy[i],
+                observables.kinetic_energy[i],
+                observables.potential_energy[i], observables.temperature[i],
+                observables.pressure[i]);
     }
 
     fclose(file_start_particles_pos);
