@@ -11,6 +11,7 @@
 #define CELL_LENGHT 2.
 #define CELL_VOLUME (CELL_LENGHT * CELL_LENGHT * CELL_LENGHT)
 #define RAND_SEED 5
+#define SIGMA_VELOCITIES 0
 #define ALPHA (5.6 / CELL_LENGHT)
 #define SIGMA (1 / (SQR_2 * ALPHA))
 #define N_K_RANGE 0
@@ -58,6 +59,14 @@ int writeParticlesPositions(struct Particle *particles, int n_particles, FILE *f
         fprintf(file, "%.5E %.5E %.5E\n", particles[i].x, particles[i].y, particles[i].z);
     }
     return 0;
+}
+
+double randGauss(double sigma)
+{
+    double x = rand() / (RAND_MAX + 1.);
+    double y = rand() / (RAND_MAX + 1.);
+
+    return sigma * sqrt(-2 * log(1 - x)) * cos(2 * PI * y);
 }
 
 double kinetic_energy(struct Particle *particles, int n_particles)
@@ -252,6 +261,7 @@ int verletPropagationStep(struct System *system, double time_step, struct Vec3 *
 
 int main(int argc, char const *argv[])
 {
+    seed(RAND_SEED);
 
     FILE *file_start_particles_pos = fopen("../output/start_pos.dat", "w");
     if (!file_start_particles_pos)
@@ -275,7 +285,7 @@ int main(int argc, char const *argv[])
     }
 
     struct System system;
-    system.n_particles = 5000;
+    system.n_particles = 500;
     system.particles = (struct Particle *)malloc(sizeof(struct Particle) * system.n_particles);
     if (!system.particles)
     {
@@ -339,9 +349,9 @@ int main(int argc, char const *argv[])
         system.particles[i].y = 0;
         system.particles[i].z = 0; */
 
-        system.particles[i].vx = 0;
-        system.particles[i].vy = 0;
-        system.particles[i].vz = 0;
+        system.particles[i].vx = randGauss(SIGMA_VELOCITIES);
+        system.particles[i].vy = randGauss(SIGMA_VELOCITIES);
+        system.particles[i].vz = randGauss(SIGMA_VELOCITIES);
 
         system.particles[i].mass = 1;
         system.particles[i].charge = 0.01;
