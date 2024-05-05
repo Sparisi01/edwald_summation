@@ -14,3 +14,5 @@
 4. La somma delle forze reciproche è negativa perchè è dovuta a gausiane della stessa carica della particella, tende a schiacciare la particella verso l'origine.
 
 5. La componente di spazio reciproco non dipende da r, anche se la carica non è nulla nella scatola (0,0,0) posso ignorare il suo contributo.
+
+R.W. Hockney and J.W. Eastwood. Computer Simulation Using Particles. CRC Press, 1985.

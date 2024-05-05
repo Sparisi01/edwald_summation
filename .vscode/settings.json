@@ -4,6 +4,9 @@
     "iterator": "c",
     "xhash": "c",
     "xmemory": "c",
-    "xutility": "c"
+    "xutility": "c",
+    "xlocale": "c",
+    "xstring": "c",
+    "edwald_summation.h": "c"
   }
 }
