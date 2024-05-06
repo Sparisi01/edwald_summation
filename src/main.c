@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
-
+// commento
 #include "constants.h"
 #include "edwald_summation.h"
 #include "observables.h"
