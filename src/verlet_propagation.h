@@ -1,33 +1,38 @@
+#include "structures.h"
+#include <stdlib.h>
 
-int verletPropagationStep(double *pos, double *vel, double **forces_ptr, double *masses, int n_particles, double t, double dt, double *(*F)(double t, double *pos, double *vel, int n_particles, void *args), void *args)
+#ifndef VERLET_PROPAGATION_H
+#define VERLET_PROPAGATION_H
+
+int verletPropagationStep(System *system, double time_step, Vec3 *(*forceFunction)(System *system, double *args), double *args)
 {
-    // Aggiorna posizioni
-    double *forces = *forces_ptr;
-    for (size_t i = 0; i < n_particles * 3; i += 3)
+
+    for (size_t i = 0; i < system->n_particles; i++)
     {
-        pos[i + 0] += vel[i + 0] * dt + 0.5 / masses[i / 3] * forces[i + 0] * dt * dt;
-        pos[i + 1] += vel[i + 1] * dt + 0.5 / masses[i / 3] * forces[i + 1] * dt * dt;
-        pos[i + 2] += vel[i + 2] * dt + 0.5 / masses[i / 3] * forces[i + 2] * dt * dt;
+        system->particles[i].x += system->particles[i].vx * time_step + 0.5 / system->particles[i].mass * system->forces[i].x * time_step * time_step;
+        system->particles[i].y += system->particles[i].vy * time_step + 0.5 / system->particles[i].mass * system->forces[i].y * time_step * time_step;
+        system->particles[i].z += system->particles[i].vz * time_step + 0.5 / system->particles[i].mass * system->forces[i].z * time_step * time_step;
     }
 
-    // Calcola forze agenti sulle particelle
-    double *new_forces = F(t + dt, pos, vel, n_particles, args);
+    system->time += time_step;
+
+    struct Vec3 *new_forces = forceFunction(system, args);
     if (!new_forces)
     {
         return 1;
     }
 
-    // Aggiorna velocità
-    for (size_t i = 0; i < n_particles * 3; i += 3)
+    for (size_t i = 0; i < system->n_particles; i++)
     {
-        vel[i + 0] += 0.5 / masses[i / 3] * (forces[i + 0] + new_forces[i + 0]) * dt;
-        vel[i + 1] += 0.5 / masses[i / 3] * (forces[i + 1] + new_forces[i + 1]) * dt;
-        vel[i + 2] += 0.5 / masses[i / 3] * (forces[i + 2] + new_forces[i + 2]) * dt;
+        system->particles[i].vx += 0.5 / system->particles[i].mass * (system->forces[i].x + new_forces[i].x) * time_step;
+        system->particles[i].vy += 0.5 / system->particles[i].mass * (system->forces[i].y + new_forces[i].y) * time_step;
+        system->particles[i].vz += 0.5 / system->particles[i].mass * (system->forces[i].z + new_forces[i].z) * time_step;
     }
 
-    // Sovrascrivi forze e libera memoria array vecchie forze
-    free(*forces_ptr);
-    *forces_ptr = new_forces;
+    free(system->forces);
+    system->forces = new_forces;
 
     return 0;
 }
+
+#endif
