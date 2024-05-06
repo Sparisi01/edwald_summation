@@ -171,11 +171,12 @@ int main(int argc, char const *argv[])
         observables.temperature[i] = 2. / 3. * observables.kinetic_energy[i] / system.n_particles;
         observables.pressure[i] = 0;
 
-        if (i < n_time_measure)
+        // Exclude the first one because it contains the edwald table generation
+        if (i < n_time_measure && i != 0)
         {
             sum_comput_times += clock() - comput_time_start;
         }
-        if (i == n_time_measure - 1)
+        if (i == n_time_measure)
         {
             double time_spent = (double)sum_comput_times / n_time_measure;
             int tot_time_sec = time_spent * n_time_step / CLOCKS_PER_SEC;

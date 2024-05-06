@@ -11,7 +11,7 @@
 #define SIGMA_VELOCITIES 1
 #define ALPHA (5.6 / CELL_LENGHT)
 #define SIGMA (1 / (SQR_2 * ALPHA))
-#define N_K_RANGE 0
+#define N_K_RANGE 5
 #define FORCE_TYPE_CONSTANT 1 // F = FORCE_TYPE_CONSTANT * (Q1*Q2)/r^2
 
 #endif
