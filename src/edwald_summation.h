@@ -78,7 +78,7 @@ Vec3 compute_real_space_force(double r_ij_x, double r_ij_y, double r_ij_z)
     return force;
 }
 
-Vec3 tabuled_reciprocal_space_term(double r_ij_x, double r_ij_y, double r_ij_z)
+Vec3 tabulated_reciprocal_space_term(double r_ij_x, double r_ij_y, double r_ij_z)
 {
     const int table_size = RECIPROCAL_SPACE_TABLE_SIZE;
     const double table_step = 2 * CELL_LENGHT / (double)table_size;
@@ -88,11 +88,11 @@ Vec3 tabuled_reciprocal_space_term(double r_ij_x, double r_ij_y, double r_ij_z)
     if (!has_been_tabled)
     {
         printf("STARTING GENERATION TABLE\n");
-        for (int i = 0; i < table_size / 2; i++)
+        for (int i = 0; i < table_size; i++)
         {
-            for (int j = 0; j < table_size / 2; j++)
+            for (int j = 0; j < table_size; j++)
             {
-                for (int k = 0; k < table_size / 2; k++)
+                for (int k = 0; k < table_size; k++)
                 {
                     table[i][j][k] = compute_reciprocal_space_force(
                         table_step * (i - table_size / 2),
@@ -153,7 +153,7 @@ Vec3 *edwald_summation(System *system, double *args)
                 particles[i].y - particles[j].y,
                 particles[i].z - particles[j].z); */
 
-            Vec3 reciprocal_space_force = tabuled_reciprocal_space_term(
+            Vec3 reciprocal_space_force = tabulated_reciprocal_space_term(
                 particles[i].x - particles[j].x,
                 particles[i].y - particles[j].y,
                 particles[i].z - particles[j].z);
