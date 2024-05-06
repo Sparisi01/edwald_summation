@@ -48,7 +48,7 @@ int main(int argc, char const *argv[])
     }
 
     struct System system;
-    system.n_particles = 500;
+    system.n_particles = 200;
     system.particles = (struct Particle *)malloc(sizeof(struct Particle) * system.n_particles);
     if (!system.particles)
     {
@@ -58,7 +58,7 @@ int main(int argc, char const *argv[])
 
     //----------------------------------------------
     double start_time = 0;
-    double end_time = 10;
+    double end_time = 6;
     double time_step = 1e-3;
 
     int n_time_step = (end_time - start_time) / time_step;

@@ -2,6 +2,7 @@
 #include "structures.h"
 #include <math.h>
 #include <stdlib.h>
+#include <time.h>
 
 #ifndef EDWALD_SUMMATION_H
 #define EDWALD_SUMMATION_H
@@ -19,15 +20,17 @@ int restore_positions_in_lattice_first_cell(Particle *particles, int n_particles
 
 Vec3 *edwald_summation(System *system, double *args)
 {
-    Particle *particles = system->particles;
 
-    Vec3 *tmp_forces = (Vec3 *)malloc(system->n_particles * sizeof(Vec3));
+    Particle *particles = system->particles;
+    int n_particles = system->n_particles;
+
+    Vec3 *tmp_forces = (Vec3 *)malloc(n_particles * sizeof(Vec3));
     if (!tmp_forces)
     {
         return NULL;
     }
 
-    for (size_t i = 0; i < system->n_particles; i++)
+    for (size_t i = 0; i < n_particles; i++)
     {
         tmp_forces[i].x = 0;
         tmp_forces[i].y = 0;
@@ -35,17 +38,20 @@ Vec3 *edwald_summation(System *system, double *args)
     }
 
     // Bring back all the particles in the (0,0,0) cell
-    restore_positions_in_lattice_first_cell(particles, system->n_particles);
+    restore_positions_in_lattice_first_cell(particles, n_particles);
 
     const int SELECTED_PARTICLE = 0;
     static int r_k_print_countdown = 5;
     double real_sum = 0;
     double k_sum = 0;
 
-    for (size_t i = 0; i < system->n_particles - 1; i++)
+    for (size_t i = 0; i < n_particles - 1; i++)
     {
-        for (size_t j = i + 1; j < system->n_particles; j++)
+        for (size_t j = i + 1; j < n_particles; j++)
         {
+
+            // REAL SPACE THERM -------------------------------------------------
+
             double r_ij_x = particles[i].x - particles[j].x - rint((particles[i].x - particles[j].x) / CELL_LENGHT) * CELL_LENGHT; //
             double r_ij_y = particles[i].y - particles[j].y - rint((particles[i].y - particles[j].y) / CELL_LENGHT) * CELL_LENGHT; //
             double r_ij_z = particles[i].z - particles[j].z - rint((particles[i].z - particles[j].z) / CELL_LENGHT) * CELL_LENGHT; //
@@ -58,7 +64,7 @@ Vec3 *edwald_summation(System *system, double *args)
             double classical_force = particles[i].charge * particles[j].charge / (r_ij * r_ij * r_ij);                         // Classic Coulomb Like force
             double edwald_correction = 2 * ALPHA / SQR_PI * exp(-(ALPHA * r_ij) * (ALPHA * r_ij)) * r_ij + erfc(ALPHA * r_ij); // Edwald correction in real space
 
-            // Force on particle i due to j
+            //  Force on particle i due to j
             tmp_forces[i].x += FORCE_TYPE_CONSTANT * r_ij_x * classical_force * edwald_correction;
             tmp_forces[i].y += FORCE_TYPE_CONSTANT * r_ij_y * classical_force * edwald_correction;
             tmp_forces[i].z += FORCE_TYPE_CONSTANT * r_ij_z * classical_force * edwald_correction;
@@ -74,16 +80,13 @@ Vec3 *edwald_summation(System *system, double *args)
                 real_sum += FORCE_TYPE_CONSTANT * r_ij_y * classical_force * edwald_correction;
                 real_sum += FORCE_TYPE_CONSTANT * r_ij_z * classical_force * edwald_correction;
             }
-        }
 
-        // SECTION - Reciprocal space force
+            // RECIPROCAL SPACE THERM -------------------------------------------------
 
-        /**NOTE - La formula non prevede l'esclusione dell'interazione tra particella i e j
-         * se esse appartengono a celle diverse. Noto però che in questo caso il sin da valore
-         * nullo. Posso escludere l'interazione.
-         **/
-        for (size_t j = i + 1; j < system->n_particles; j++)
-        {
+            /**NOTE - La formula non prevede l'esclusione dell'interazione tra particella i e j
+             * se esse appartengono a celle diverse. Noto però che in questo caso il sin da valore
+             * nullo. Posso escludere l'interazione.
+             **/
             for (int n_k_x = -N_K_RANGE; n_k_x <= N_K_RANGE; n_k_x++)
             {
                 for (int n_k_y = -N_K_RANGE; n_k_y <= N_K_RANGE; n_k_y++)
@@ -94,13 +97,14 @@ Vec3 *edwald_summation(System *system, double *args)
                         {
                             continue;
                         }
+
                         double k_x = n_k_x * 2 * PI / CELL_LENGHT;               // Componente x vettore spazione reciproco
                         double k_y = n_k_y * 2 * PI / CELL_LENGHT;               // Componente y vettore spazione reciproco
                         double k_z = n_k_z * 2 * PI / CELL_LENGHT;               // Componente z vettore spazione reciproco
                         double k_vec_mag2 = (k_x * k_x + k_y * k_y + k_z * k_z); // Magnitude square of reciprocal-lattice vector
 
-                        double dot_prod_pos_k = (k_x * (system->particles[i].x - system->particles[j].x) + k_y * (system->particles[i].y - system->particles[j].y) + k_z * (system->particles[i].z - system->particles[j].z));
-                        double long_distance_force = 4 * PI / CELL_VOLUME * system->particles[i].charge * system->particles[j].charge;
+                        double dot_prod_pos_k = (k_x * (particles[i].x - particles[j].x) + k_y * (particles[i].y - particles[j].y) + k_z * (particles[i].z - particles[j].z));
+                        double long_distance_force = 4 * PI / CELL_VOLUME * particles[i].charge * particles[j].charge;
                         long_distance_force *= exp(-k_vec_mag2 / (2 * ALPHA * ALPHA)) / k_vec_mag2 * sin(dot_prod_pos_k);
 
                         // tmp_forces on particle i due to j copies
