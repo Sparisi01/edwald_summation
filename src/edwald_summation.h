@@ -80,10 +80,10 @@ Vec3 compute_real_space_force(double r_ij_x, double r_ij_y, double r_ij_z)
 
 Vec3 tabuled_reciprocal_space_term(double r_ij_x, double r_ij_y, double r_ij_z)
 {
-    const int table_size = 32;
+    const int table_size = RECIPROCAL_SPACE_TABLE_SIZE;
     const double table_step = 2 * CELL_LENGHT / (double)table_size;
     static int has_been_tabled = 0;
-    static Vec3 table[32][32][32];
+    static Vec3 table[RECIPROCAL_SPACE_TABLE_SIZE][RECIPROCAL_SPACE_TABLE_SIZE][RECIPROCAL_SPACE_TABLE_SIZE];
 
     if (!has_been_tabled)
     {
@@ -101,8 +101,9 @@ Vec3 tabuled_reciprocal_space_term(double r_ij_x, double r_ij_y, double r_ij_z)
                 }
             }
         }
-        printf("TABLE COMPLETED\n");
         has_been_tabled = 1;
+        printf("TABLE COMPLETED\n");
+        printf("--------------------\n");
     }
 
     return table[(int)floor((r_ij_x) / table_step) + table_size / 2]
@@ -133,7 +134,7 @@ Vec3 *edwald_summation(System *system, double *args)
     restore_positions_in_lattice_first_cell(particles, n_particles);
 
     const int SELECTED_PARTICLE = 0;
-    static int r_k_print_countdown = 5;
+    static int r_k_print_countdown = 1;
     double real_sum = 0;
     double k_sum = 0;
 
@@ -158,8 +159,8 @@ Vec3 *edwald_summation(System *system, double *args)
                 particles[i].z - particles[j].z);
 
             tmp_forces[i].x += FORCE_TYPE_CONSTANT * particles[i].charge * particles[j].charge * (real_space_force.x + reciprocal_space_force.x);
-            tmp_forces[i].z += FORCE_TYPE_CONSTANT * particles[i].charge * particles[j].charge * (real_space_force.y + reciprocal_space_force.y);
-            tmp_forces[i].y += FORCE_TYPE_CONSTANT * particles[i].charge * particles[j].charge * (real_space_force.z + reciprocal_space_force.z);
+            tmp_forces[i].y += FORCE_TYPE_CONSTANT * particles[i].charge * particles[j].charge * (real_space_force.y + reciprocal_space_force.y);
+            tmp_forces[i].z += FORCE_TYPE_CONSTANT * particles[i].charge * particles[j].charge * (real_space_force.z + reciprocal_space_force.z);
 
             tmp_forces[j].x -= FORCE_TYPE_CONSTANT * particles[i].charge * particles[j].charge * (real_space_force.x + reciprocal_space_force.x);
             tmp_forces[j].y -= FORCE_TYPE_CONSTANT * particles[i].charge * particles[j].charge * (real_space_force.y + reciprocal_space_force.y);

@@ -11,7 +11,8 @@
 #define SIGMA_VELOCITIES 1
 #define ALPHA (5.6 / CELL_LENGHT)
 #define SIGMA (1 / (SQR_2 * ALPHA))
+#define N_PARTICLES 300
 #define N_K_RANGE 5
 #define FORCE_TYPE_CONSTANT 1 // F = FORCE_TYPE_CONSTANT * (Q1*Q2)/r^2
-
+#define RECIPROCAL_SPACE_TABLE_SIZE 64
 #endif

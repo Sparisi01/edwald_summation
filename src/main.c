@@ -48,7 +48,7 @@ int main(int argc, char const *argv[])
     }
 
     struct System system;
-    system.n_particles = 200;
+    system.n_particles = N_PARTICLES;
     system.particles = (struct Particle *)malloc(sizeof(struct Particle) * system.n_particles);
     if (!system.particles)
     {
@@ -108,32 +108,13 @@ int main(int argc, char const *argv[])
         system.particles[i].y = rand() / (RAND_MAX + 1.0) * CELL_LENGHT - CELL_LENGHT / 2;
         system.particles[i].z = rand() / (RAND_MAX + 1.0) * CELL_LENGHT - CELL_LENGHT / 2;
 
-        /* system.particles[i].x = 0;
-        system.particles[i].y = 0;
-        system.particles[i].z = 0; */
-
         system.particles[i].vx = randGauss(SIGMA_VELOCITIES);
         system.particles[i].vy = randGauss(SIGMA_VELOCITIES);
         system.particles[i].vz = randGauss(SIGMA_VELOCITIES);
 
         system.particles[i].mass = 1;
-        system.particles[i].charge = 1;
+        system.particles[i].charge = 0.1;
     }
-
-    /* system.particles[0].x = 0.3;
-    system.particles[1].x = -0.3;
-    system.particles[2].y = 0.3;
-    system.particles[3].y = -0.3;
-
-    system.particles[0].charge = 0.01;
-    system.particles[1].charge = 0.01;
-    system.particles[2].charge = 0.01;
-    system.particles[3].charge = 0.01;
-
-    system.particles[0].mass = 1;
-    system.particles[1].mass = 1;
-    system.particles[2].mass = 1;
-    system.particles[3].mass = 1; */
 
     printf("--------------------\n");
     printf("AVVIO SIMULAZIONE\n");
@@ -183,7 +164,7 @@ int main(int argc, char const *argv[])
             int sec = tot_time_sec % 60;        // Estimated time seconds
             int min = (tot_time_sec / 60) % 60; // Estimated time minutes
             int h = tot_time_sec / 3600;        // Estimated time hours
-            printf("--------------------\nVerlet time: %d ms\nTempo totale stimato: %d:%d:%d [h:m:s]\n--------------------\n", (int)time_spent, h, min, sec);
+            printf("--------------------\nVerlet time: %d ms\nTotale estimated time: %d:%d:%d [h:m:s]\n--------------------\n", (int)time_spent, h, min, sec);
         }
     }
 
@@ -199,6 +180,12 @@ int main(int argc, char const *argv[])
                 observables.potential_energy[i], observables.temperature[i],
                 observables.pressure[i]);
     }
+
+    int equilibrium_step = 0;
+
+    double mean_temperature = mean(observables.temperature, equilibrium_step, n_time_step);
+    double std_temperature = stddev(observables.temperature, equilibrium_step, n_time_step);
+    printf("TEMPERATURE = %.5E ± %.5E\n", mean_temperature, std_temperature);
 
     fclose(file_start_particles_pos);
     fclose(file_end_particles_pos);
