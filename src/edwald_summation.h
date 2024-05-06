@@ -6,7 +6,7 @@
 #ifndef EDWALD_SUMMATION_H
 #define EDWALD_SUMMATION_H
 
-int restore_positions_in_lattice_first_cell(struct Particle *particles, int n_particles)
+int restore_positions_in_lattice_first_cell(Particle *particles, int n_particles)
 {
     for (size_t i = 0; i < n_particles; i++)
     {
