@@ -82,17 +82,20 @@ Vec3 compute_real_space_force(double r_ij_x, double r_ij_y, double r_ij_z)
 Vec3 tabulated_reciprocal_space_term(double r_ij_x, double r_ij_y, double r_ij_z)
 {
     const int table_size = RECIPROCAL_SPACE_TABLE_SIZE;
-    const double table_step = 2 * CELL_LENGHT / RECIPROCAL_SPACE_TABLE_SIZE;
+    // -4 done to have a layer of 4 cells unreachable by the system
+    // but used in case of a tricubic interpolation
+    // table range is [-(2*CELL_LENGHT + 2*table_step), (2*CELL_LENGHT + 2*table_step)]
+    const double table_step = 2 * CELL_LENGHT / (table_size - 4.);
     static int has_been_tabled = 0;
     static Vec3 table
-        [RECIPROCAL_SPACE_TABLE_SIZE + 4]
-        [RECIPROCAL_SPACE_TABLE_SIZE + 4]
-        [RECIPROCAL_SPACE_TABLE_SIZE + 4];
+        [RECIPROCAL_SPACE_TABLE_SIZE]
+        [RECIPROCAL_SPACE_TABLE_SIZE]
+        [RECIPROCAL_SPACE_TABLE_SIZE];
 
     if (!has_been_tabled)
     {
         printf("STARTING GENERATION TABLE\n");
-        for (int i = 0; i < table_size + 4; i++)
+        for (int i = 0; i < table_size; i++)
         {
             for (int j = 0; j < table_size; j++)
             {
@@ -105,98 +108,106 @@ Vec3 tabulated_reciprocal_space_term(double r_ij_x, double r_ij_y, double r_ij_z
                 }
             }
         }
+
         has_been_tabled = 1;
         printf("TABLE COMPLETED\n");
         printf("--------------------\n");
+
+        // Save table file
+        if (1)
+        {
+            printf("SAVING TABLE\n");
+            FILE *table_file = fopen("./tables/table_L2_N32.dat", "w");
+            for (int i = 0; i < table_size; i++)
+                for (int j = 0; j < table_size; j++)
+                    for (int k = 0; k < table_size; k++)
+                        printf(table_file,
+                               "%d %d %d %.6E %.6E %.6E", i, j, k,
+                               table[i][j][k].x,
+                               table[i][j][k].y,
+                               table[i][j][k].z);
+            printf("--------------------\n");
+        }
     }
 
-    /*  Vec4 x1 = {
-         floor((r_ij_x) / table_step) + table_size / 2,
-         floor((r_ij_y) / table_step) + table_size / 2,
-         floor((r_ij_z) / table_step) + table_size / 2};
-     Vec4 x2 = {
-         floor((r_ij_x) / table_step) + table_size / 2 + 1,
-         floor((r_ij_y) / table_step) + table_size / 2,
-         floor((r_ij_z) / table_step) + table_size / 2};
-     Vec4 x3 = {
-         floor((r_ij_x) / table_step) + table_size / 2,
-         floor((r_ij_y) / table_step) + table_size / 2 + 1,
-         floor((r_ij_z) / table_step) + table_size / 2};
-     Vec4 x4 = {
-         floor((r_ij_x) / table_step) + table_size / 2 + 1,
-         floor((r_ij_y) / table_step) + table_size / 2 + 1,
-         floor((r_ij_z) / table_step) + table_size / 2};
-     Vec4 x5 = {
-         floor((r_ij_x) / table_step) + table_size / 2,
-         floor((r_ij_y) / table_step) + table_size / 2,
-         floor((r_ij_z) / table_step) + table_size / 2 + 1};
-     Vec4 x6 = {
-         floor((r_ij_x) / table_step) + table_size / 2 + 1,
-         floor((r_ij_y) / table_step) + table_size / 2,
-         floor((r_ij_z) / table_step) + table_size / 2 + 1};
-     Vec4 x7 = {
-         floor((r_ij_x) / table_step) + table_size / 2,
-         floor((r_ij_y) / table_step) + table_size / 2 + 1,
-         floor((r_ij_z) / table_step) + table_size / 2 + 1};
-     Vec4 x8 = {
-         floor((r_ij_x) / table_step) + table_size / 2 + 1,
-         floor((r_ij_y) / table_step) + table_size / 2 + 1,
-         floor((r_ij_z) / table_step) + table_size / 2 + 1};
+    // the particle is contained in a table cell, the index of the box bottom vertex
+    // is x0,y0,z0. The value of edwald can be obtained for that vertex by retrieving
+    // table[x0][y0][z0]
+    double x0 = floor((r_ij_x) / table_step) + table_size / 2;
+    double y0 = floor((r_ij_y) / table_step) + table_size / 2;
+    double z0 = floor((r_ij_z) / table_step) + table_size / 2;
 
-     Vec3 pt = {
-         (r_ij_x) / table_step + table_size / 2,
-         (r_ij_y) / table_step + table_size / 2,
-         (r_ij_z) / table_step + table_size / 2};
+    // Al coordinate are translated and scaled in order to have a cube
+    // of size 1x1x1, the vertex (x0,y0,z0) goes to (0,0,0).
+    Vec4 x1 = {0, 0, 0, 0};
+    Vec4 x2 = {1, 0, 0, 0};
+    Vec4 x3 = {0, 1, 0, 0};
+    Vec4 x4 = {1, 1, 0, 0};
+    Vec4 x5 = {0, 0, 1, 0};
+    Vec4 x6 = {1, 0, 1, 0};
+    Vec4 x7 = {0, 1, 1, 0};
+    Vec4 x8 = {1, 1, 1, 0};
 
-     Vec3 v1 = table[(int)x1.x][(int)x1.y][(int)x1.z];
-     Vec3 v2 = table[(int)x2.x][(int)x2.y][(int)x2.z];
-     Vec3 v3 = table[(int)x3.x][(int)x3.y][(int)x3.z];
-     Vec3 v4 = table[(int)x4.x][(int)x4.y][(int)x4.z];
-     Vec3 v5 = table[(int)x5.x][(int)x5.y][(int)x5.z];
-     Vec3 v6 = table[(int)x6.x][(int)x6.y][(int)x6.z];
-     Vec3 v7 = table[(int)x7.x][(int)x7.y][(int)x7.z];
-     Vec3 v8 = table[(int)x8.x][(int)x8.y][(int)x8.z];
+    // Coordinate of the point in the new coordinate.
+    // pt.x ∈ [0,1], pt.y ∈ [0,1], pt.z ∈ [0,1].
+    Vec3 pt = {
+        (r_ij_x / table_step) - x0 + table_size / 2,
+        (r_ij_y / table_step) - y0 + table_size / 2,
+        (r_ij_z / table_step) - z0 + table_size / 2,
+    };
 
-     Vec3 result;
+    // Value of edwald in the vertexies
+    Vec3 v1 = table[(int)x0 + 0][(int)y0 + 0][(int)z0 + 0];
+    Vec3 v2 = table[(int)x0 + 1][(int)y0 + 0][(int)z0 + 0];
+    Vec3 v3 = table[(int)x0 + 0][(int)y0 + 1][(int)z0 + 0];
+    Vec3 v4 = table[(int)x0 + 1][(int)y0 + 1][(int)z0 + 0];
+    Vec3 v5 = table[(int)x0 + 0][(int)y0 + 0][(int)z0 + 1];
+    Vec3 v6 = table[(int)x0 + 1][(int)y0 + 0][(int)z0 + 1];
+    Vec3 v7 = table[(int)x0 + 0][(int)y0 + 1][(int)z0 + 1];
+    Vec3 v8 = table[(int)x0 + 1][(int)y0 + 1][(int)z0 + 1];
 
-     x1.w = v1.x;
-     x2.w = v2.x;
-     x3.w = v3.x;
-     x4.w = v4.x;
-     x5.w = v5.x;
-     x6.w = v6.x;
-     x7.w = v7.x;
-     x8.w = v8.x;
+    // Edwald therm is a 3D vectorial field, so we need three interpolations,
+    // one for each coordinate.
+    Vec3 result;
 
-     result.x = lerp3D(pt.x, pt.y, pt.z, x1, x2, x3, x4, x5, x6, x7, x8);
+    x1.w = v1.x;
+    x2.w = v2.x;
+    x3.w = v3.x;
+    x4.w = v4.x;
+    x5.w = v5.x;
+    x6.w = v6.x;
+    x7.w = v7.x;
+    x8.w = v8.x;
 
-     x1.w = v1.z;
-     x2.w = v2.z;
-     x3.w = v3.z;
-     x4.w = v4.z;
-     x5.w = v5.z;
-     x6.w = v6.z;
-     x7.w = v7.z;
-     x8.w = v8.z;
+    result.x = lerp3D(pt.x, pt.y, pt.z, x1, x2, x3, x4, x5, x6, x7, x8);
 
-     result.y = lerp3D(pt.x, pt.y, pt.z, x1, x2, x3, x4, x5, x6, x7, x8);
+    x1.w = v1.y;
+    x2.w = v2.y;
+    x3.w = v3.y;
+    x4.w = v4.y;
+    x5.w = v5.y;
+    x6.w = v6.y;
+    x7.w = v7.y;
+    x8.w = v8.y;
 
-     x1.w = v1.z;
-     x2.w = v2.z;
-     x3.w = v3.z;
-     x4.w = v4.z;
-     x5.w = v5.z;
-     x6.w = v6.z;
-     x7.w = v7.z;
-     x8.w = v8.z;
+    result.y = lerp3D(pt.x, pt.y, pt.z, x1, x2, x3, x4, x5, x6, x7, x8);
 
-     result.z = lerp3D(pt.x, pt.y, pt.z, x1, x2, x3, x4, x5, x6, x7, x8);
+    x1.w = v1.z;
+    x2.w = v2.z;
+    x3.w = v3.z;
+    x4.w = v4.z;
+    x5.w = v5.z;
+    x6.w = v6.z;
+    x7.w = v7.z;
+    x8.w = v8.z;
 
-     return result; */
+    result.z = lerp3D(pt.x, pt.y, pt.z, x1, x2, x3, x4, x5, x6, x7, x8);
 
-    return table[(int)floor((r_ij_x) / table_step) + table_size / 2]
+    return result;
+
+    /* return table[(int)floor((r_ij_x) / table_step) + table_size / 2]
                 [(int)floor((r_ij_y) / table_step) + table_size / 2]
-                [(int)floor((r_ij_z) / table_step) + table_size / 2];
+                [(int)floor((r_ij_z) / table_step) + table_size / 2]; */
 }
 
 Vec3 *edwald_summation(System *system, double *args)
