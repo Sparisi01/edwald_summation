@@ -108,9 +108,9 @@ int main(int argc, char const *argv[])
         system.particles[i].y = rand() / (RAND_MAX + 1.0) * CELL_LENGHT - CELL_LENGHT / 2;
         system.particles[i].z = rand() / (RAND_MAX + 1.0) * CELL_LENGHT - CELL_LENGHT / 2;
 
-        system.particles[i].vx = randGauss(SIGMA_VELOCITIES);
-        system.particles[i].vy = randGauss(SIGMA_VELOCITIES);
-        system.particles[i].vz = randGauss(SIGMA_VELOCITIES);
+        system.particles[i].vx = randGauss(0, SIGMA_VELOCITIES);
+        system.particles[i].vy = randGauss(0, SIGMA_VELOCITIES);
+        system.particles[i].vz = randGauss(0, SIGMA_VELOCITIES);
 
         system.particles[i].mass = 1;
         system.particles[i].charge = 0.1;

@@ -79,6 +79,19 @@ Vec3 compute_real_space_force(double r_ij_x, double r_ij_y, double r_ij_z)
     return force;
 }
 
+/// @brief Function that use a 3D pre-computed vectorial field to perform a
+/// trilinear interpolation and estimate the edwald force in r_ij.
+/// The first time the function is called the table is filled/loaded from file.
+///
+/// UPPERBOUND ERROR FOR DIFFERENT MATRIX SIZES
+/// 32x32x32: 2.5%
+/// 64x64x64: 0.6%
+/// 128x128x128: 0.15%
+///
+/// @param r_ij_x
+/// @param r_ij_y
+/// @param r_ij_z
+/// @return Vec3 containing the estimated force-vector in r_ij
 Vec3 tabulated_reciprocal_space_term(double r_ij_x, double r_ij_y, double r_ij_z)
 {
     const int table_size = RECIPROCAL_SPACE_TABLE_SIZE;
@@ -113,11 +126,10 @@ Vec3 tabulated_reciprocal_space_term(double r_ij_x, double r_ij_y, double r_ij_z
         printf("TABLE COMPLETED\n");
         printf("--------------------\n");
 
-        // Save table file
         if (1)
         {
             printf("SAVING TABLE\n");
-            FILE *table_file = fopen("./tables/table_L2_N32.dat", "w");
+            FILE *table_file = fopen("./tables/table_L2_N16.dat", "w");
             for (int i = 0; i < table_size; i++)
                 for (int j = 0; j < table_size; j++)
                     for (int k = 0; k < table_size; k++)
@@ -130,12 +142,12 @@ Vec3 tabulated_reciprocal_space_term(double r_ij_x, double r_ij_y, double r_ij_z
         }
     }
 
-    // the particle is contained in a table cell, the index of the box bottom vertex
+    // The particle is contained in a table cell, the index of the box bottom vertex
     // is x0,y0,z0. The value of edwald can be obtained for that vertex by retrieving
     // table[x0][y0][z0]
-    double x0 = floor((r_ij_x) / table_step) + table_size / 2;
-    double y0 = floor((r_ij_y) / table_step) + table_size / 2;
-    double z0 = floor((r_ij_z) / table_step) + table_size / 2;
+    int x0 = floor((r_ij_x) / table_step) + table_size / 2;
+    int y0 = floor((r_ij_y) / table_step) + table_size / 2;
+    int z0 = floor((r_ij_z) / table_step) + table_size / 2;
 
     // Al coordinate are translated and scaled in order to have a cube
     // of size 1x1x1, the vertex (x0,y0,z0) goes to (0,0,0).
@@ -156,20 +168,21 @@ Vec3 tabulated_reciprocal_space_term(double r_ij_x, double r_ij_y, double r_ij_z
         (r_ij_z / table_step) - z0 + table_size / 2,
     };
 
-    // Value of edwald in the vertexies
-    Vec3 v1 = table[(int)x0 + 0][(int)y0 + 0][(int)z0 + 0];
-    Vec3 v2 = table[(int)x0 + 1][(int)y0 + 0][(int)z0 + 0];
-    Vec3 v3 = table[(int)x0 + 0][(int)y0 + 1][(int)z0 + 0];
-    Vec3 v4 = table[(int)x0 + 1][(int)y0 + 1][(int)z0 + 0];
-    Vec3 v5 = table[(int)x0 + 0][(int)y0 + 0][(int)z0 + 1];
-    Vec3 v6 = table[(int)x0 + 1][(int)y0 + 0][(int)z0 + 1];
-    Vec3 v7 = table[(int)x0 + 0][(int)y0 + 1][(int)z0 + 1];
-    Vec3 v8 = table[(int)x0 + 1][(int)y0 + 1][(int)z0 + 1];
+    // Value of edwald in the vertecies
+    Vec3 v1 = table[x0 + 0][y0 + 0][z0 + 0];
+    Vec3 v2 = table[x0 + 1][y0 + 0][z0 + 0];
+    Vec3 v3 = table[x0 + 0][y0 + 1][z0 + 0];
+    Vec3 v4 = table[x0 + 1][y0 + 1][z0 + 0];
+    Vec3 v5 = table[x0 + 0][y0 + 0][z0 + 1];
+    Vec3 v6 = table[x0 + 1][y0 + 0][z0 + 1];
+    Vec3 v7 = table[x0 + 0][y0 + 1][z0 + 1];
+    Vec3 v8 = table[x0 + 1][y0 + 1][z0 + 1];
 
     // Edwald therm is a 3D vectorial field, so we need three interpolations,
     // one for each coordinate.
-    Vec3 result;
+    Vec3 estimated_force;
 
+    // X FORCE COMPONENT
     x1.w = v1.x;
     x2.w = v2.x;
     x3.w = v3.x;
@@ -179,8 +192,9 @@ Vec3 tabulated_reciprocal_space_term(double r_ij_x, double r_ij_y, double r_ij_z
     x7.w = v7.x;
     x8.w = v8.x;
 
-    result.x = lerp3D(pt.x, pt.y, pt.z, x1, x2, x3, x4, x5, x6, x7, x8);
+    estimated_force.x = lerp3D(pt.x, pt.y, pt.z, x1, x2, x3, x4, x5, x6, x7, x8);
 
+    // Y FORCE COMPONENT
     x1.w = v1.y;
     x2.w = v2.y;
     x3.w = v3.y;
@@ -190,8 +204,9 @@ Vec3 tabulated_reciprocal_space_term(double r_ij_x, double r_ij_y, double r_ij_z
     x7.w = v7.y;
     x8.w = v8.y;
 
-    result.y = lerp3D(pt.x, pt.y, pt.z, x1, x2, x3, x4, x5, x6, x7, x8);
+    estimated_force.y = lerp3D(pt.x, pt.y, pt.z, x1, x2, x3, x4, x5, x6, x7, x8);
 
+    // Z FORCE COMPONENT
     x1.w = v1.z;
     x2.w = v2.z;
     x3.w = v3.z;
@@ -201,9 +216,9 @@ Vec3 tabulated_reciprocal_space_term(double r_ij_x, double r_ij_y, double r_ij_z
     x7.w = v7.z;
     x8.w = v8.z;
 
-    result.z = lerp3D(pt.x, pt.y, pt.z, x1, x2, x3, x4, x5, x6, x7, x8);
+    estimated_force.z = lerp3D(pt.x, pt.y, pt.z, x1, x2, x3, x4, x5, x6, x7, x8);
 
-    return result;
+    return estimated_force;
 
     /* return table[(int)floor((r_ij_x) / table_step) + table_size / 2]
                 [(int)floor((r_ij_y) / table_step) + table_size / 2]
@@ -261,6 +276,7 @@ Vec3 *edwald_summation(System *system, double *args)
             tmp_forces[i].y += FORCE_TYPE_CONSTANT * particles[i].charge * particles[j].charge * (real_space_force.y + reciprocal_space_force.y);
             tmp_forces[i].z += FORCE_TYPE_CONSTANT * particles[i].charge * particles[j].charge * (real_space_force.z + reciprocal_space_force.z);
 
+            // Use Newton third principle
             tmp_forces[j].x -= FORCE_TYPE_CONSTANT * particles[i].charge * particles[j].charge * (real_space_force.x + reciprocal_space_force.x);
             tmp_forces[j].y -= FORCE_TYPE_CONSTANT * particles[i].charge * particles[j].charge * (real_space_force.y + reciprocal_space_force.y);
             tmp_forces[j].z -= FORCE_TYPE_CONSTANT * particles[i].charge * particles[j].charge * (real_space_force.z + reciprocal_space_force.z);
@@ -276,7 +292,6 @@ Vec3 *edwald_summation(System *system, double *args)
                 real_sum += real_space_force.z;
             }
         }
-        /*!SECTION */
     }
     if (r_k_print_countdown > 0)
     {
