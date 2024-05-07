@@ -121,11 +121,11 @@ Vec3 tabulated_reciprocal_space_term(double r_ij_x, double r_ij_y, double r_ij_z
             for (int i = 0; i < table_size; i++)
                 for (int j = 0; j < table_size; j++)
                     for (int k = 0; k < table_size; k++)
-                        printf(table_file,
-                               "%d %d %d %.6E %.6E %.6E", i, j, k,
-                               table[i][j][k].x,
-                               table[i][j][k].y,
-                               table[i][j][k].z);
+                        fprintf(table_file,
+                                "%d %d %d %.6E %.6E %.6E\n", i, j, k,
+                                table[i][j][k].x,
+                                table[i][j][k].y,
+                                table[i][j][k].z);
             printf("--------------------\n");
         }
     }
