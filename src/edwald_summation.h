@@ -1,4 +1,5 @@
 #include "constants.h"
+#include "interpolation.h"
 #include "structures.h"
 #include <math.h>
 #include <stdlib.h>
@@ -81,14 +82,17 @@ Vec3 compute_real_space_force(double r_ij_x, double r_ij_y, double r_ij_z)
 Vec3 tabulated_reciprocal_space_term(double r_ij_x, double r_ij_y, double r_ij_z)
 {
     const int table_size = RECIPROCAL_SPACE_TABLE_SIZE;
-    const double table_step = 2 * CELL_LENGHT / (double)table_size;
+    const double table_step = 2 * CELL_LENGHT / RECIPROCAL_SPACE_TABLE_SIZE;
     static int has_been_tabled = 0;
-    static Vec3 table[RECIPROCAL_SPACE_TABLE_SIZE][RECIPROCAL_SPACE_TABLE_SIZE][RECIPROCAL_SPACE_TABLE_SIZE];
+    static Vec3 table
+        [RECIPROCAL_SPACE_TABLE_SIZE + 4]
+        [RECIPROCAL_SPACE_TABLE_SIZE + 4]
+        [RECIPROCAL_SPACE_TABLE_SIZE + 4];
 
     if (!has_been_tabled)
     {
         printf("STARTING GENERATION TABLE\n");
-        for (int i = 0; i < table_size; i++)
+        for (int i = 0; i < table_size + 4; i++)
         {
             for (int j = 0; j < table_size; j++)
             {
@@ -105,6 +109,90 @@ Vec3 tabulated_reciprocal_space_term(double r_ij_x, double r_ij_y, double r_ij_z
         printf("TABLE COMPLETED\n");
         printf("--------------------\n");
     }
+
+    /*  Vec4 x1 = {
+         floor((r_ij_x) / table_step) + table_size / 2,
+         floor((r_ij_y) / table_step) + table_size / 2,
+         floor((r_ij_z) / table_step) + table_size / 2};
+     Vec4 x2 = {
+         floor((r_ij_x) / table_step) + table_size / 2 + 1,
+         floor((r_ij_y) / table_step) + table_size / 2,
+         floor((r_ij_z) / table_step) + table_size / 2};
+     Vec4 x3 = {
+         floor((r_ij_x) / table_step) + table_size / 2,
+         floor((r_ij_y) / table_step) + table_size / 2 + 1,
+         floor((r_ij_z) / table_step) + table_size / 2};
+     Vec4 x4 = {
+         floor((r_ij_x) / table_step) + table_size / 2 + 1,
+         floor((r_ij_y) / table_step) + table_size / 2 + 1,
+         floor((r_ij_z) / table_step) + table_size / 2};
+     Vec4 x5 = {
+         floor((r_ij_x) / table_step) + table_size / 2,
+         floor((r_ij_y) / table_step) + table_size / 2,
+         floor((r_ij_z) / table_step) + table_size / 2 + 1};
+     Vec4 x6 = {
+         floor((r_ij_x) / table_step) + table_size / 2 + 1,
+         floor((r_ij_y) / table_step) + table_size / 2,
+         floor((r_ij_z) / table_step) + table_size / 2 + 1};
+     Vec4 x7 = {
+         floor((r_ij_x) / table_step) + table_size / 2,
+         floor((r_ij_y) / table_step) + table_size / 2 + 1,
+         floor((r_ij_z) / table_step) + table_size / 2 + 1};
+     Vec4 x8 = {
+         floor((r_ij_x) / table_step) + table_size / 2 + 1,
+         floor((r_ij_y) / table_step) + table_size / 2 + 1,
+         floor((r_ij_z) / table_step) + table_size / 2 + 1};
+
+     Vec3 pt = {
+         (r_ij_x) / table_step + table_size / 2,
+         (r_ij_y) / table_step + table_size / 2,
+         (r_ij_z) / table_step + table_size / 2};
+
+     Vec3 v1 = table[(int)x1.x][(int)x1.y][(int)x1.z];
+     Vec3 v2 = table[(int)x2.x][(int)x2.y][(int)x2.z];
+     Vec3 v3 = table[(int)x3.x][(int)x3.y][(int)x3.z];
+     Vec3 v4 = table[(int)x4.x][(int)x4.y][(int)x4.z];
+     Vec3 v5 = table[(int)x5.x][(int)x5.y][(int)x5.z];
+     Vec3 v6 = table[(int)x6.x][(int)x6.y][(int)x6.z];
+     Vec3 v7 = table[(int)x7.x][(int)x7.y][(int)x7.z];
+     Vec3 v8 = table[(int)x8.x][(int)x8.y][(int)x8.z];
+
+     Vec3 result;
+
+     x1.w = v1.x;
+     x2.w = v2.x;
+     x3.w = v3.x;
+     x4.w = v4.x;
+     x5.w = v5.x;
+     x6.w = v6.x;
+     x7.w = v7.x;
+     x8.w = v8.x;
+
+     result.x = lerp3D(pt.x, pt.y, pt.z, x1, x2, x3, x4, x5, x6, x7, x8);
+
+     x1.w = v1.z;
+     x2.w = v2.z;
+     x3.w = v3.z;
+     x4.w = v4.z;
+     x5.w = v5.z;
+     x6.w = v6.z;
+     x7.w = v7.z;
+     x8.w = v8.z;
+
+     result.y = lerp3D(pt.x, pt.y, pt.z, x1, x2, x3, x4, x5, x6, x7, x8);
+
+     x1.w = v1.z;
+     x2.w = v2.z;
+     x3.w = v3.z;
+     x4.w = v4.z;
+     x5.w = v5.z;
+     x6.w = v6.z;
+     x7.w = v7.z;
+     x8.w = v8.z;
+
+     result.z = lerp3D(pt.x, pt.y, pt.z, x1, x2, x3, x4, x5, x6, x7, x8);
+
+     return result; */
 
     return table[(int)floor((r_ij_x) / table_step) + table_size / 2]
                 [(int)floor((r_ij_y) / table_step) + table_size / 2]

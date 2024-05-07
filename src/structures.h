@@ -1,10 +1,20 @@
 #ifndef STRUCTURES_H
 #define STRUCTURES_H
 
+typedef struct Vec2
+{
+    double x, y;
+} Vec2;
+
 typedef struct Vec3
 {
     double x, y, z;
 } Vec3;
+
+typedef struct Vec4
+{
+    double x, y, z, w;
+} Vec4;
 
 typedef struct Particle
 {
