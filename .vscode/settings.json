@@ -7,6 +7,8 @@
     "xutility": "c",
     "xlocale": "c",
     "xstring": "c",
-    "edwald_summation.h": "c"
+    "edwald_summation.h": "c",
+    "interpolation.h": "c",
+    "structures.h": "c"
   }
 }

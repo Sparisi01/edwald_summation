@@ -30,6 +30,12 @@ double lerp2D(
         vec4.x, vec4.y, vec4.w \
     }
 
+// Formula for trilinear interpolation.
+// Source https://en.wikipedia.org/wiki/Trilinear_interpolation#/media/File:3D_interpolation2.svg
+// Vertex must be in the current position (x,y,z):
+// 1 - (0,0,0) // 4 - (1,1,0) // 7 - (1,0,1)
+// 2 - (1,0,0) // 5 - (0,0,1) // 8 - (1,1,1)
+// 3 - (0,1,0) // 6 - (0,1,1)
 double lerp3D(
     double x,
     double y,
@@ -46,22 +52,5 @@ double lerp3D(
     // Linear interpolation between the last two
     return lerp1D(z, vert1.z, l1, vert5.z, l2);
 }
-
-/* double lerp3D(
-    Vec3 x, Vec3 x1, Vec3 x2, Vec3 x3, Vec3 x4, Vec3 x5, Vec3 x6, Vec3 x7, Vec3 x8,
-    double v1, double v2, double v3, double v4, double v5, double v6, double v7, double v8)
-{
-
-    double w1 = (x.x - x1.x) * (x.y - x1.y) * (x.z - x1.z) * v8;
-    double w2 = (x2.x - x.x) * (x.y - x2.y) * (x.z - x2.z) * v7;
-    double w3 = (x.x - x3.x) * (x3.y - x.y) * (x.z - x3.z) * v6;
-    double w4 = (x4.x - x.x) * (x4.y - x.y) * (x4.z - x.z) * v5;
-    double w5 = (x.x - x5.x) * (x.y - x5.y) * (x5.z - x.z) * v4;
-    double w6 = (x6.x - x.x) * (x.y - x6.y) * (x6.z - x.z) * v3;
-    double w7 = (x.x - x7.x) * (x7.y - x.y) * (x7.z - x.z) * v2;
-    double w8 = (x8.x - x.x) * (x8.y - x.y) * (x8.z - x.z) * v1;
-
-    return (w1 + w2 + w3 + w4 + w5 + w6 + w7 + w8) / ((x8.x - x1.x) * (x8.y - x1.y) * (x8.z - x1.z));
-} */
 
 #endif
