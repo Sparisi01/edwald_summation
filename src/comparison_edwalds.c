@@ -11,12 +11,6 @@
 int main(int argc, char const *argv[])
 {
 
-    FILE *file = fopen("../output/error_table_reciprocal_128_lin.dat", "w");
-
-    double n_step = 100;
-    double a = 2 * CELL_LENGHT / (RECIPROCAL_SPACE_TABLE_SIZE - 4);
-    double step = a / n_step;
-
     printf("Starting evaluation for %d samples\n", N_SAMPLES);
     printf("Matrix size: %d\nCell lenght: %f\n", RECIPROCAL_SPACE_TABLE_SIZE, CELL_LENGHT);
 
@@ -52,6 +46,6 @@ int main(int argc, char const *argv[])
     printf("Relative error y: %.3E ± %.3E\n", mean(values_y, 0, N_SAMPLES - 1), stddev(values_y, 0, N_SAMPLES - 1));
     printf("Relative error z: %.3E ± %.3E\n", mean(values_z, 0, N_SAMPLES - 1), stddev(values_z, 0, N_SAMPLES - 1));
 
-    fclose(file);
+    fclose(table_error_file);
     return 0;
 }

@@ -35,4 +35,47 @@ double potential_energy(Particle *particles, int n_particles)
     return pot_energy;
 }
 
+// The first time radialDistribution is called
+// alloc and array of bins, each bin correspond to a certain radial range.
+// Each time the function is called calculate the radial distribution
+// of particle around each other. For each couple of particle the distance is calculated
+// and the corresponding bin is increased by 1. The bin array is independent by the single
+// function call. This let you make statistic on different system time.
+// To reset the array pass the OPTION = 0.
+double *radialDistribution(System *system, short OPTION)
+{
+    static int *bins;
+    static int has_been_allocated = 0;
+
+    const int n_bins = 0;
+    const double rad_step = CELL_LENGHT / n_bins;
+
+    if (!has_been_allocated)
+    {
+        bins = (int *)calloc(n_bins, sizeof(int));
+        if (!bins)
+        {
+            perror("Error allocating bins array");
+            exit(EXIT_FAILURE);
+        }
+    }
+
+    switch (OPTION)
+    {
+    case 0: // reset the array and then do case 1
+        free(bins);
+        bins = (int *)calloc(n_bins, sizeof(int));
+        if (!bins)
+        {
+            perror("Error allocating bins array");
+            exit(EXIT_FAILURE);
+        }
+    case 1: // add current system radial distribution to the bins array
+        // TODO: perform radial distribution
+        break;
+    default:
+        break;
+    }
+}
+
 #endif

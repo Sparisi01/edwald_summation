@@ -160,7 +160,7 @@ Vec3 tabulated_reciprocal_space_term(double r_ij_x, double r_ij_y, double r_ij_z
         printf("TABLE COMPLETED\n");
         printf("--------------------\n");
 
-        if (1)
+        if (0)
         {
             printf("SAVING TABLE\n");
             FILE *table_file = fopen("./tables/table_L2_N64.dat", "w");
