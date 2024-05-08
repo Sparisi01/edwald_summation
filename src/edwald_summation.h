@@ -100,13 +100,47 @@ Vec3 tabulated_reciprocal_space_term(double r_ij_x, double r_ij_y, double r_ij_z
     // table range is [-(2*CELL_LENGHT + 2*table_step), (2*CELL_LENGHT + 2*table_step)]
     const double table_step = 2 * CELL_LENGHT / (table_size - 4.);
     static int has_been_tabled = 0;
-    static Vec3 table
+    /* static Vec3 table
         [RECIPROCAL_SPACE_TABLE_SIZE]
         [RECIPROCAL_SPACE_TABLE_SIZE]
-        [RECIPROCAL_SPACE_TABLE_SIZE];
+        [RECIPROCAL_SPACE_TABLE_SIZE]; */
+
+    static Vec3 ***table;
 
     if (!has_been_tabled)
     {
+        if (table_size % 2 == 1)
+        {
+            perror("RECIPROCAL_SPACE_TABLE_SIZE must be even");
+            exit(EXIT_FAILURE);
+        }
+
+        // Alloc 3D vector field
+        table = (Vec3 ***)malloc(sizeof(Vec3 **) * table_size);
+        if (!table)
+        {
+            perror("Error allocating table");
+            exit(EXIT_FAILURE);
+        }
+        for (size_t i = 0; i < table_size; i++)
+        {
+            table[i] = (Vec3 **)malloc(sizeof(Vec3 *) * table_size);
+            if (!table[i])
+            {
+                perror("Error allocating table");
+                exit(EXIT_FAILURE);
+            }
+            for (size_t j = 0; j < table_size; j++)
+            {
+                table[i][j] = (Vec3 *)malloc(sizeof(Vec3) * table_size);
+                if (!table[i][j])
+                {
+                    perror("Error allocating table");
+                    exit(EXIT_FAILURE);
+                }
+            }
+        }
+
         printf("STARTING GENERATION TABLE\n");
         for (int i = 0; i < table_size; i++)
         {
@@ -129,7 +163,7 @@ Vec3 tabulated_reciprocal_space_term(double r_ij_x, double r_ij_y, double r_ij_z
         if (1)
         {
             printf("SAVING TABLE\n");
-            FILE *table_file = fopen("./tables/table_L2_N64.dat", "w");
+            FILE *table_file = fopen("./tables/table_L2_N128.dat", "w");
             for (int i = 0; i < table_size; i++)
                 for (int j = 0; j < table_size; j++)
                     for (int k = 0; k < table_size; k++)

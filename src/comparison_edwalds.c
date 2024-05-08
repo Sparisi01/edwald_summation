@@ -6,6 +6,8 @@
 #include "edwald_summation.h"
 #include "statistic.h"
 
+#define N_SAMPLES 100000
+
 int main(int argc, char const *argv[])
 {
 
@@ -14,6 +16,9 @@ int main(int argc, char const *argv[])
     double n_step = 100;
     double a = 2 * CELL_LENGHT / (RECIPROCAL_SPACE_TABLE_SIZE - 4);
     double step = a / n_step;
+
+    printf("Starting evaluation for %d samples\n", N_SAMPLES);
+    printf("Matrix size: %d\nCell lenght: %f\n", RECIPROCAL_SPACE_TABLE_SIZE, CELL_LENGHT);
 
     // Generate table
     tabulated_reciprocal_space_term(0, 0, 0);
@@ -26,10 +31,10 @@ int main(int argc, char const *argv[])
         fprintf(file, "%.5E %.5E %.5E %.5E\n", k * step, table_value.z / exact_value.z, table_value.z, exact_value.z);
     } */
 
-    double values_x[10000];
-    double values_y[10000];
-    double values_z[10000];
-    for (size_t i = 0; i < 10000; i++)
+    double *values_x = (double *)malloc(sizeof(double) * N_SAMPLES);
+    double *values_y = (double *)malloc(sizeof(double) * N_SAMPLES);
+    double *values_z = (double *)malloc(sizeof(double) * N_SAMPLES);
+    for (size_t i = 0; i < N_SAMPLES; i++)
     {
         double rnd1 = (2 * rand() / (RAND_MAX + 1.) - 1) * CELL_LENGHT;
         double rnd2 = (2 * rand() / (RAND_MAX + 1.) - 1) * CELL_LENGHT;
@@ -42,9 +47,9 @@ int main(int argc, char const *argv[])
         values_z[i] = (table_value.z - exact_value.z) / exact_value.z;
     }
 
-    printf("%lf ± %lf", mean(values_x, 0, 9999), stddev(values_x, 0, 9999));
-    printf("%lf ± %lf", mean(values_y, 0, 9999), stddev(values_y, 0, 9999));
-    printf("%lf ± %lf", mean(values_z, 0, 9999), stddev(values_z, 0, 9999));
+    printf("Relative error x: %.3E ± %.3E\n", mean(values_x, 0, N_SAMPLES - 1), stddev(values_x, 0, N_SAMPLES - 1));
+    printf("Relative error y: %.3E ± %.3E\n", mean(values_y, 0, N_SAMPLES - 1), stddev(values_y, 0, N_SAMPLES - 1));
+    printf("Relative error z: %.3E ± %.3E\n", mean(values_z, 0, N_SAMPLES - 1), stddev(values_z, 0, N_SAMPLES - 1));
 
     fclose(file);
     return 0;
