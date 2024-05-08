@@ -163,7 +163,7 @@ Vec3 tabulated_reciprocal_space_term(double r_ij_x, double r_ij_y, double r_ij_z
         if (1)
         {
             printf("SAVING TABLE\n");
-            FILE *table_file = fopen("./tables/table_L2_N128.dat", "w");
+            FILE *table_file = fopen("./tables/table_L2_N64.dat", "w");
             for (int i = 0; i < table_size; i++)
                 for (int j = 0; j < table_size; j++)
                     for (int k = 0; k < table_size; k++)
@@ -305,6 +305,28 @@ Vec3 *edwald_summation(System *system, double *args)
                 particles[i].x - particles[j].x,
                 particles[i].y - particles[j].y,
                 particles[i].z - particles[j].z);
+
+            // Coorrection obtained by the study of mean and stdev
+            // on a dataset of trilinear approximation (L=2, table_size = 64).
+            // Relative error is:
+            // (reciprocal_space_force.a - real_space_force.a) / real_space_force.a
+            // with a ∈ {x,y,z}
+
+            // NO CORRECTION:
+            // Relative error x: -2.670E-03 ± 3.024E-03
+            // Relative error y: -2.643E-03 ± 3.001E-03
+            // Relative error z: -2.619E-03 ± 3.079E-03
+
+            // WITH CORRECTION:
+            // Relative error x: -4.148E-06 ± 3.032E-03
+            // Relative error y : -6.957E-06 ± 3.008E-03
+            // Relative error z : -1.372E-05 ± 3.087E-03
+
+            // Code in comparison_edwalds.c
+
+            reciprocal_space_force.x *= 1.00267;
+            reciprocal_space_force.y *= 1.00264;
+            reciprocal_space_force.z *= 1.00261;
 
             tmp_forces[i].x += FORCE_TYPE_CONSTANT * particles[i].charge * particles[j].charge * (real_space_force.x + reciprocal_space_force.x);
             tmp_forces[i].y += FORCE_TYPE_CONSTANT * particles[i].charge * particles[j].charge * (real_space_force.y + reciprocal_space_force.y);
