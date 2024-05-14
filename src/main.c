@@ -58,7 +58,7 @@ int main(int argc, char const *argv[])
 
     //----------------------------------------------
     double start_time = 0;
-    double end_time = 6;
+    double end_time = 10;
     double time_step = 1e-3;
 
     int n_time_step = (end_time - start_time) / time_step;
@@ -104,9 +104,9 @@ int main(int argc, char const *argv[])
 
     for (size_t i = 0; i < system.n_particles; i++)
     {
-        system.particles[i].x = rand() / (RAND_MAX + 1.0) * CELL_LENGHT - CELL_LENGHT / 2;
-        system.particles[i].y = rand() / (RAND_MAX + 1.0) * CELL_LENGHT - CELL_LENGHT / 2;
-        system.particles[i].z = rand() / (RAND_MAX + 1.0) * CELL_LENGHT - CELL_LENGHT / 2;
+        system.particles[i].x = randUnif(-CELL_LENGHT / 2, CELL_LENGHT / 2);
+        system.particles[i].y = randUnif(-CELL_LENGHT / 2, CELL_LENGHT / 2);
+        system.particles[i].z = randUnif(-CELL_LENGHT / 2, CELL_LENGHT / 2);
 
         system.particles[i].vx = randGauss(0, SIGMA_VELOCITIES);
         system.particles[i].vy = randGauss(0, SIGMA_VELOCITIES);
@@ -114,6 +114,8 @@ int main(int argc, char const *argv[])
 
         system.particles[i].mass = 1;
         system.particles[i].charge = 0.1;
+
+        // printf("%1.10E\n", system.particles[i].vz);
     }
 
     printf("--------------------\n");
@@ -124,6 +126,7 @@ int main(int argc, char const *argv[])
     printf("Δt, dt: %lf, %lf\n", end_time - start_time, time_step);
     printf("--------------------\n");
 
+    // Parallelized verison could not be used the first time due to the matrix compilation
     system.forces = edwald_summation(&system, NULL);
 
     writeParticlesPositions(system.particles, system.n_particles, file_start_particles_pos);
@@ -139,18 +142,27 @@ int main(int argc, char const *argv[])
 
         system.time = start_time + i * time_step;
 
-        int result = verletPropagationStep(&system, time_step, edwald_summation, NULL);
-        if (result)
-        {
-            perror("Error in verlet propagation step: ");
-            exit(EXIT_FAILURE);
-        }
-
         observables.time[i] = system.time;
         observables.kinetic_energy[i] = kinetic_energy(system.particles, system.n_particles);
         observables.potential_energy[i] = potential_energy(system.particles, system.n_particles);
         observables.temperature[i] = 2. / 3. * observables.kinetic_energy[i] / system.n_particles;
         observables.pressure[i] = 0;
+
+        int result;
+        if (USE_PARALLELIZATION)
+        {
+            result = verletPropagationStep(&system, time_step, edwald_summation_parallelized, NULL);
+        }
+        else
+        {
+            result = verletPropagationStep(&system, time_step, edwald_summation, NULL);
+        }
+
+        if (result)
+        {
+            perror("Error in verlet propagation step: ");
+            exit(EXIT_FAILURE);
+        }
 
         // Exclude the first one because it contains the edwald table generation
         if (i < n_time_measure && i != 0)
@@ -177,7 +189,8 @@ int main(int argc, char const *argv[])
                 start_time + i * time_step,
                 observables.kinetic_energy[i] + observables.potential_energy[i],
                 observables.kinetic_energy[i],
-                observables.potential_energy[i], observables.temperature[i],
+                observables.potential_energy[i],
+                observables.temperature[i],
                 observables.pressure[i]);
     }
 

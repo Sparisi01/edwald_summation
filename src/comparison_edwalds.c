@@ -11,11 +11,12 @@
 int main(int argc, char const *argv[])
 {
 
+    srand(RAND_SEED);
     printf("Starting evaluation for %d samples\n", N_SAMPLES);
     printf("Matrix size: %d\nCell lenght: %f\n", RECIPROCAL_SPACE_TABLE_SIZE, CELL_LENGHT);
 
     // Generate table
-    tabulated_reciprocal_space_term(0, 0, 0);
+    tabulated_reciprocal_space_term((Vec3){0, 0, 0});
 
     FILE *table_error_file = fopen("../output/table_error_file.dat", "w");
 
@@ -27,13 +28,13 @@ int main(int argc, char const *argv[])
         double rnd1 = (2 * rand() / (RAND_MAX + 1.) - 1) * CELL_LENGHT;
         double rnd2 = (2 * rand() / (RAND_MAX + 1.) - 1) * CELL_LENGHT;
         double rnd3 = (2 * rand() / (RAND_MAX + 1.) - 1) * CELL_LENGHT;
-        Vec3 table_value = tabulated_reciprocal_space_term(rnd1, rnd2, rnd3);
+        Vec3 table_value = tabulated_reciprocal_space_term((Vec3){rnd1, rnd2, rnd3});
 
-        table_value.x *= 1.00267;
-        table_value.y *= 1.00264;
-        table_value.z *= 1.00261;
+        /*  table_value.x *= 1.00267;
+         table_value.y *= 1.00264;
+         table_value.z *= 1.00261; */
 
-        Vec3 exact_value = compute_reciprocal_space_force(rnd1, rnd2, rnd3);
+        Vec3 exact_value = compute_reciprocal_space_force((Vec3){rnd1, rnd2, rnd3});
 
         values_x[i] = (table_value.x - exact_value.x) / exact_value.x;
         values_y[i] = (table_value.y - exact_value.y) / exact_value.y;

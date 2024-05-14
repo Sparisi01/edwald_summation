@@ -47,7 +47,7 @@ double *radialDistribution(System *system, short OPTION)
     static int *bins;
     static int has_been_allocated = 0;
 
-    const int n_bins = 0;
+    const int n_bins = 1;
     const double rad_step = CELL_LENGHT / n_bins;
 
     if (!has_been_allocated)
@@ -76,6 +76,8 @@ double *radialDistribution(System *system, short OPTION)
     default:
         break;
     }
+
+    return 0;
 }
 
 #endif

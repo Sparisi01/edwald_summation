@@ -16,7 +16,7 @@ int verletPropagationStep(System *system, double time_step, Vec3 *(*forceFunctio
 
     system->time += time_step;
 
-    struct Vec3 *new_forces = forceFunction(system, args);
+    Vec3 *new_forces = forceFunction(system, args);
     if (!new_forces)
     {
         return 1;

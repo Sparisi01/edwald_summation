@@ -1,7 +1,9 @@
 #include "constants.h"
 #include "interpolation.h"
 #include "structures.h"
+
 #include <math.h>
+#include <pthread.h>
 #include <stdlib.h>
 #include <time.h>
 
@@ -19,7 +21,7 @@ int restore_positions_in_lattice_first_cell(Particle *particles, int n_particles
     return 0;
 }
 
-Vec3 compute_reciprocal_space_force(double r_ij_x, double r_ij_y, double r_ij_z)
+Vec3 compute_reciprocal_space_force(Vec3 r_ij)
 {
     Vec3 force = {.x = 0, .y = 0, .z = 0};
 
@@ -29,19 +31,20 @@ Vec3 compute_reciprocal_space_force(double r_ij_x, double r_ij_y, double r_ij_z)
         {
             for (int n_k_z = -N_K_RANGE; n_k_z <= N_K_RANGE; n_k_z++)
             {
-                if (n_k_x == 0 && n_k_y == 0 && n_k_z == 0)
-                {
-                    continue;
-                }
+                if (n_k_x == 0 && n_k_y == 0 && n_k_z == 0) continue;
 
                 double k_x = n_k_x * 2 * PI / CELL_LENGHT;               // Componente x vettore spazione reciproco
                 double k_y = n_k_y * 2 * PI / CELL_LENGHT;               // Componente y vettore spazione reciproco
                 double k_z = n_k_z * 2 * PI / CELL_LENGHT;               // Componente z vettore spazione reciproco
                 double k_vec_mag2 = (k_x * k_x + k_y * k_y + k_z * k_z); // Magnitude square of reciprocal-lattice vector
 
-                double dot_prod_pos_k = (k_x * r_ij_x + k_y * r_ij_y + k_z * r_ij_z);
+                double dot_prod_pos_k = (k_x * r_ij.x + k_y * r_ij.y + k_z * r_ij.z);
                 double long_distance_force = 4 * PI / CELL_VOLUME;
-                long_distance_force *= exp(-k_vec_mag2 / (2 * ALPHA * ALPHA)) / k_vec_mag2 * sin(dot_prod_pos_k);
+
+                // Coulomb
+                // long_distance_force *= exp(-(k_vec_mag2) / (4 * ALPHA * ALPHA)) / (k_vec_mag2) * sin(dot_prod_pos_k);
+                // Yukawa
+                long_distance_force *= exp(-(k_vec_mag2 + LAMBDA * LAMBDA) / (4 * ALPHA * ALPHA)) / (k_vec_mag2 + LAMBDA * LAMBDA) * sin(dot_prod_pos_k);
 
                 // tmp_forces on particle i due to j copies
                 force.x += FORCE_TYPE_CONSTANT * k_x * long_distance_force;
@@ -54,27 +57,26 @@ Vec3 compute_reciprocal_space_force(double r_ij_x, double r_ij_y, double r_ij_z)
     return force;
 }
 
-Vec3 compute_real_space_force(double r_ij_x, double r_ij_y, double r_ij_z)
+Vec3 compute_real_space_force(Vec3 r_ij)
 {
     Vec3 force = {.x = 0, .y = 0, .z = 0};
 
     // In real space i-force has to be compute with the j-particle
     // nearest copy in the lattice.
-    r_ij_x = r_ij_x - rint((r_ij_x) / CELL_LENGHT) * CELL_LENGHT;
-    r_ij_y = r_ij_y - rint((r_ij_y) / CELL_LENGHT) * CELL_LENGHT;
-    r_ij_z = r_ij_z - rint((r_ij_z) / CELL_LENGHT) * CELL_LENGHT;
+    r_ij.x = r_ij.x - rint((r_ij.x) / CELL_LENGHT) * CELL_LENGHT;
+    r_ij.y = r_ij.y - rint((r_ij.y) / CELL_LENGHT) * CELL_LENGHT;
+    r_ij.z = r_ij.z - rint((r_ij.z) / CELL_LENGHT) * CELL_LENGHT;
 
-    double r_ij = sqrt(r_ij_x * r_ij_x + r_ij_y * r_ij_y + r_ij_z * r_ij_z);
+    double r_ij_mod = sqrt(r_ij.x * r_ij.x + r_ij.y * r_ij.y + r_ij.z * r_ij.z);
 
-    /* if (r_ij >= CELL_L / 2) {
-        continue;  // CUTOF potential
-    } */
+    if (r_ij_mod >= CELL_LENGHT / 2)
+        return force; // CUTOF potential
 
-    double edwald_correction = 2 * ALPHA / SQR_PI * exp(-(ALPHA * r_ij) * (ALPHA * r_ij)) * r_ij + erfc(ALPHA * r_ij); // Edwald correction in real space
+    double edwald_correction = 2 * ALPHA / SQR_PI * exp(-(ALPHA * r_ij_mod) * (ALPHA * r_ij_mod)) * r_ij_mod + erfc(ALPHA * r_ij_mod); // Edwald correction in real space
 
-    force.x = r_ij_x / (r_ij * r_ij * r_ij) * edwald_correction;
-    force.y = r_ij_y / (r_ij * r_ij * r_ij) * edwald_correction;
-    force.z = r_ij_z / (r_ij * r_ij * r_ij) * edwald_correction;
+    force.x = r_ij.x / (r_ij_mod * r_ij_mod * r_ij_mod) * edwald_correction;
+    force.y = r_ij.y / (r_ij_mod * r_ij_mod * r_ij_mod) * edwald_correction;
+    force.z = r_ij.z / (r_ij_mod * r_ij_mod * r_ij_mod) * edwald_correction;
 
     return force;
 }
@@ -92,7 +94,7 @@ Vec3 compute_real_space_force(double r_ij_x, double r_ij_y, double r_ij_z)
 /// @param r_ij_y
 /// @param r_ij_z
 /// @return Vec3 containing the estimated force-vector in r_ij
-Vec3 tabulated_reciprocal_space_term(double r_ij_x, double r_ij_y, double r_ij_z)
+Vec3 tabulated_reciprocal_space_term(Vec3 r_ij)
 {
     const int table_size = RECIPROCAL_SPACE_TABLE_SIZE;
     // -4 done to have a layer of 4 cells unreachable by the system
@@ -119,7 +121,7 @@ Vec3 tabulated_reciprocal_space_term(double r_ij_x, double r_ij_y, double r_ij_z
         table = (Vec3 ***)malloc(sizeof(Vec3 **) * table_size);
         if (!table)
         {
-            perror("Error allocating table");
+            perror("Error allocating Edwald table");
             exit(EXIT_FAILURE);
         }
         for (size_t i = 0; i < table_size; i++)
@@ -127,7 +129,7 @@ Vec3 tabulated_reciprocal_space_term(double r_ij_x, double r_ij_y, double r_ij_z
             table[i] = (Vec3 **)malloc(sizeof(Vec3 *) * table_size);
             if (!table[i])
             {
-                perror("Error allocating table");
+                perror("Error allocating Edwald table");
                 exit(EXIT_FAILURE);
             }
             for (size_t j = 0; j < table_size; j++)
@@ -135,7 +137,7 @@ Vec3 tabulated_reciprocal_space_term(double r_ij_x, double r_ij_y, double r_ij_z
                 table[i][j] = (Vec3 *)malloc(sizeof(Vec3) * table_size);
                 if (!table[i][j])
                 {
-                    perror("Error allocating table");
+                    perror("Error allocating Edwald table");
                     exit(EXIT_FAILURE);
                 }
             }
@@ -148,10 +150,10 @@ Vec3 tabulated_reciprocal_space_term(double r_ij_x, double r_ij_y, double r_ij_z
             {
                 for (int k = 0; k < table_size; k++)
                 {
-                    table[i][j][k] = compute_reciprocal_space_force(
+                    table[i][j][k] = compute_reciprocal_space_force((Vec3){
                         table_step * (i - table_size / 2),
                         table_step * (j - table_size / 2),
-                        table_step * (k - table_size / 2));
+                        table_step * (k - table_size / 2)});
                 }
             }
         }
@@ -179,9 +181,9 @@ Vec3 tabulated_reciprocal_space_term(double r_ij_x, double r_ij_y, double r_ij_z
     // The particle is contained in a table cell, the index of the box bottom vertex
     // is x0,y0,z0. The value of edwald can be obtained for that vertex by retrieving
     // table[x0][y0][z0]
-    int x0 = floor((r_ij_x) / table_step) + table_size / 2;
-    int y0 = floor((r_ij_y) / table_step) + table_size / 2;
-    int z0 = floor((r_ij_z) / table_step) + table_size / 2;
+    int x0 = floor((r_ij.x) / table_step) + table_size / 2;
+    int y0 = floor((r_ij.y) / table_step) + table_size / 2;
+    int z0 = floor((r_ij.z) / table_step) + table_size / 2;
 
     // Al coordinate are translated and scaled in order to have a cube
     // of size 1x1x1, the vertex (x0,y0,z0) goes to (0,0,0).
@@ -197,9 +199,9 @@ Vec3 tabulated_reciprocal_space_term(double r_ij_x, double r_ij_y, double r_ij_z
     // Coordinate of the point in the new coordinate.
     // pt.x ∈ [0,1], pt.y ∈ [0,1], pt.z ∈ [0,1].
     Vec3 pt = {
-        (r_ij_x / table_step) - x0 + table_size / 2,
-        (r_ij_y / table_step) - y0 + table_size / 2,
-        (r_ij_z / table_step) - z0 + table_size / 2,
+        (r_ij.x / table_step) - x0 + table_size / 2,
+        (r_ij.y / table_step) - y0 + table_size / 2,
+        (r_ij.z / table_step) - z0 + table_size / 2,
     };
 
     // Value of edwald in the vertecies
@@ -291,20 +293,20 @@ Vec3 *edwald_summation(System *system, double *args)
         for (size_t j = i + 1; j < n_particles; j++)
         {
 
-            Vec3 real_space_force = compute_real_space_force(
-                particles[i].x - particles[j].x,
-                particles[i].y - particles[j].y,
-                particles[i].z - particles[j].z);
+            Vec3 real_space_force = compute_real_space_force((Vec3){
+                .x = particles[i].x - particles[j].x,
+                .y = particles[i].y - particles[j].y,
+                .z = particles[i].z - particles[j].z});
 
             /* Vec3 reciprocal_space_force = compute_reciprocal_space_force(
                 particles[i].x - particles[j].x,
                 particles[i].y - particles[j].y,
                 particles[i].z - particles[j].z); */
 
-            Vec3 reciprocal_space_force = tabulated_reciprocal_space_term(
-                particles[i].x - particles[j].x,
-                particles[i].y - particles[j].y,
-                particles[i].z - particles[j].z);
+            Vec3 reciprocal_space_force = tabulated_reciprocal_space_term((Vec3){
+                .x = particles[i].x - particles[j].x,
+                .y = particles[i].y - particles[j].y,
+                .z = particles[i].z - particles[j].z});
 
             // Coorrection obtained by the study of mean and stdev
             // on a dataset of trilinear approximation (L=2, table_size = 64).
@@ -357,4 +359,107 @@ Vec3 *edwald_summation(System *system, double *args)
 
     return tmp_forces;
 }
+
+// PARALLELIZATION
+
+void *partial_particle_for(void *args)
+{
+    int n_particles = (*(PartialForStruct *)args).n_particles;
+    Particle *particles = (*(PartialForStruct *)args).particles;
+    Vec3 *tmp_forces = (*(PartialForStruct *)args).tmp_forces;
+    int start_index = (*(PartialForStruct *)args).start_index;
+    int end_index = (*(PartialForStruct *)args).end_index;
+
+    for (size_t i = start_index; i < end_index; i++)
+    {
+        for (size_t j = 0; j < n_particles; j++)
+        {
+
+            if (i == j) continue;
+            Vec3 real_space_force = compute_real_space_force((Vec3){
+                .x = particles[i].x - particles[j].x,
+                .y = particles[i].y - particles[j].y,
+                .z = particles[i].z - particles[j].z});
+
+            Vec3 reciprocal_space_force = tabulated_reciprocal_space_term((Vec3){
+                .x = particles[i].x - particles[j].x,
+                .y = particles[i].y - particles[j].y,
+                .z = particles[i].z - particles[j].z});
+
+            reciprocal_space_force.x *= 1.00267;
+            reciprocal_space_force.y *= 1.00264;
+            reciprocal_space_force.z *= 1.00261;
+
+            tmp_forces[i].x += FORCE_TYPE_CONSTANT * particles[i].charge * particles[j].charge * (real_space_force.x + reciprocal_space_force.x);
+            tmp_forces[i].y += FORCE_TYPE_CONSTANT * particles[i].charge * particles[j].charge * (real_space_force.y + reciprocal_space_force.y);
+            tmp_forces[i].z += FORCE_TYPE_CONSTANT * particles[i].charge * particles[j].charge * (real_space_force.z + reciprocal_space_force.z);
+        }
+    }
+
+    return NULL;
+}
+
+Vec3 *edwald_summation_parallelized(System *system, double *args)
+{
+
+    Particle *particles = system->particles;
+    int n_particles = system->n_particles;
+
+    Vec3 *tmp_forces = (Vec3 *)malloc(n_particles * sizeof(Vec3));
+    if (!tmp_forces)
+    {
+        return NULL;
+    }
+
+    for (size_t i = 0; i < n_particles; i++)
+    {
+        tmp_forces[i].x = 0;
+        tmp_forces[i].y = 0;
+        tmp_forces[i].z = 0;
+    }
+
+    // Bring back all the particles in the (0,0,0) cell
+    restore_positions_in_lattice_first_cell(particles, n_particles);
+
+    // DO PARALLELIZED THINGS
+    pthread_t *thread_ids = (pthread_t *)malloc(N_THREADS * sizeof(pthread_t));
+    if (!thread_ids)
+    {
+        perror("Error allocating threads");
+        exit(EXIT_FAILURE);
+    }
+
+    // Why I need an array?
+    // If you use always the same info variable each loop
+    // a new PartialForStruct struct is allocated and removed from the stack,
+    // resulting in having the same pointer passed to all the thread pointing each time at a new struct with
+    // different values of start_index and end_index.
+    // Depending on the order of the istruction executed by te cpu the result is
+    // umpredictable.
+
+    PartialForStruct infos[N_THREADS];
+
+    int remainder = (int)N_PARTICLES % (int)N_THREADS;
+    for (size_t i = 0; i < N_THREADS; i++)
+    {
+
+        infos[i] = (PartialForStruct){
+            .start_index = (int)N_PARTICLES / (int)N_THREADS * i,
+            .end_index = (i == (int)N_THREADS - 1) ? (int)N_PARTICLES / (int)N_THREADS * (i + 1) + remainder : (int)N_PARTICLES / (int)N_THREADS * (i + 1),
+            .n_particles = n_particles,
+            .particles = particles,
+            .tmp_forces = tmp_forces,
+        };
+
+        pthread_create(&thread_ids[i], NULL, partial_particle_for, &infos[i]);
+    }
+
+    // Wait for all thread to finish
+    for (int i = 0; i < N_THREADS; i++)
+        pthread_join(thread_ids[i], NULL);
+
+    free(thread_ids);
+    return tmp_forces;
+}
+
 #endif

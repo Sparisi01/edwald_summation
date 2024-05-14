@@ -11,8 +11,11 @@
 #define SIGMA_VELOCITIES (sqrt(1))
 #define ALPHA (5.6 / CELL_LENGHT)
 #define SIGMA (1 / (SQR_2 * ALPHA))
-#define N_PARTICLES 500
+#define N_PARTICLES 300
 #define N_K_RANGE 5
 #define FORCE_TYPE_CONSTANT 1 // F = FORCE_TYPE_CONSTANT * (Q1*Q2)/r^2
-#define RECIPROCAL_SPACE_TABLE_SIZE 64
+#define RECIPROCAL_SPACE_TABLE_SIZE 32
+#define LAMBDA 0 // Yukawa potential factor (0 = coulomb)
+#define USE_PARALLELIZATION 1
+#define N_THREADS 3
 #endif

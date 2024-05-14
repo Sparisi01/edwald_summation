@@ -30,13 +30,18 @@ double stddev(double *array, size_t start_index, size_t end_index)
     return sqrt(var(array, start_index, end_index));
 }
 
+double randUnif(double min, double max)
+{
+    return min + rand() / (RAND_MAX + 1.) * (max - min);
+}
+
 // Return a random value gaussian distributed
 double randGauss(double mean, double sigma)
 {
-    double x = rand() / (RAND_MAX + 1.);
-    double y = rand() / (RAND_MAX + 1.);
+    double x = randUnif(0, 1);
+    double y = randUnif(0, 1);
 
-    return sigma * sqrt(-2 * log(1 - x)) * cos(2 * PI * y) + mean;
+    return mean + sigma * sqrt(-2 * log(1 - x)) * cos(2 * PI * y);
 }
 
 #endif

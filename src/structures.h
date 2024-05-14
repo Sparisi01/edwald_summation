@@ -41,4 +41,13 @@ typedef struct Observables
     double *potential_energy;
 } Observables;
 
+typedef struct PartialForStruct
+{
+    int start_index;
+    int end_index;
+    int n_particles;
+    Particle *particles;
+    Vec3 *tmp_forces;
+} PartialForStruct;
+
 #endif
