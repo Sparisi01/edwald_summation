@@ -58,3 +58,23 @@ int main(int argc, char const *argv[])
 
     return 0;
 }
+
+// --------------------
+// N Particelle: 300
+// Volume: 8.000000
+// Δt, dt: 10.000000, 0.001000
+// --------------------
+//
+// // VERSIONE PARALLELIZZATA
+// --------------------
+// Verlet time: 21 ms
+// Totale estimated time: 0:3:30 [h:m:s]
+// --------------------
+// TEMPERATURE = 1.02302E+00 ± 1.40480E-02
+//
+// // VERSIONE NON PARALLELIZZATA
+// --------------------
+// Verlet time: 26 ms
+// Totale estimated time: 0:4:22 [h:m:s]
+// --------------------
+// TEMPERATURE = 1.02302E+00 ± 1.40570E-02

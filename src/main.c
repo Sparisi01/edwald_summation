@@ -58,7 +58,7 @@ int main(int argc, char const *argv[])
 
     //----------------------------------------------
     double start_time = 0;
-    double end_time = 10;
+    double end_time = 60;
     double time_step = 1e-3;
 
     int n_time_step = (end_time - start_time) / time_step;
@@ -194,11 +194,24 @@ int main(int argc, char const *argv[])
                 observables.pressure[i]);
     }
 
-    int equilibrium_step = 0;
+    int equilibrium_step = 500;
 
+    // PRINT THERMODINAMIC
     double mean_temperature = mean(observables.temperature, equilibrium_step, n_time_step);
     double std_temperature = stddev(observables.temperature, equilibrium_step, n_time_step);
     printf("TEMPERATURE = %.5E ± %.5E\n", mean_temperature, std_temperature);
+
+    double *energy = (double *)malloc(sizeof(double) * n_time_step);
+    for (size_t i = 0; i < n_time_step; i++)
+        energy[i] = observables.kinetic_energy[i] + observables.potential_energy[i];
+
+    double mean_energy = mean(energy, equilibrium_step, n_time_step);
+    double std_energy = stddev(energy, equilibrium_step, n_time_step);
+    printf("ENERGY = %.5E ± %.5E\n", mean_energy, std_energy);
+
+    double mean_pressure = mean(observables.pressure, equilibrium_step, n_time_step);
+    double std_pressure = stddev(observables.pressure, equilibrium_step, n_time_step);
+    printf("PRESSURE = %.5E ± %.5E\n", mean_pressure, std_pressure);
 
     fclose(file_start_particles_pos);
     fclose(file_end_particles_pos);

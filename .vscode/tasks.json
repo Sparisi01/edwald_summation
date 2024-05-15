@@ -9,9 +9,9 @@
         "-g",
         "${file}",
         "-pthread",
+        "-O3",
         "-o",
-        "${fileDirname}\\build\\${fileBasenameNoExtension}.exe",
-        "-O0"
+        "${fileDirname}\\build\\${fileBasenameNoExtension}.exe"
       ],
       "options": {
         "cwd": "${fileDirname}"
@@ -32,6 +32,7 @@
         "-g",
         "${file}",
         "-pthread",
+        "-O3",
         "-o",
         "${fileDirname}\\build\\${fileBasenameNoExtension}.exe"
       ],

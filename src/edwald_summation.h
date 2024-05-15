@@ -69,8 +69,8 @@ Vec3 compute_real_space_force(Vec3 r_ij)
 
     double r_ij_mod = sqrt(r_ij.x * r_ij.x + r_ij.y * r_ij.y + r_ij.z * r_ij.z);
 
-    if (r_ij_mod >= CELL_LENGHT / 2)
-        return force; // CUTOF potential
+    /* if (r_ij_mod >= CELL_LENGHT / 2)
+        return force; // CUTOF potential */
 
     double edwald_correction = 2 * ALPHA / SQR_PI * exp(-(ALPHA * r_ij_mod) * (ALPHA * r_ij_mod)) * r_ij_mod + erfc(ALPHA * r_ij_mod); // Edwald correction in real space
 
@@ -254,6 +254,27 @@ Vec3 tabulated_reciprocal_space_term(Vec3 r_ij)
 
     estimated_force.z = lerp3D(pt.x, pt.y, pt.z, x1, x2, x3, x4, x5, x6, x7, x8);
 
+    // Coorrection obtained by the study of mean and stdev
+    // on a dataset of trilinear approximation (L=2, table_size = 64).
+    // Relative error is:
+    // (reciprocal_space_force.a - real_space_force.a) / real_space_force.a
+    // with a ∈ {x,y,z}
+
+    // NO CORRECTION:
+    // Relative error x: -2.670E-03 ± 3.024E-03
+    // Relative error y: -2.643E-03 ± 3.001E-03
+    // Relative error z: -2.619E-03 ± 3.079E-03
+
+    // WITH CORRECTION:
+    // Relative error x: -4.148E-06 ± 3.032E-03
+    // Relative error y : -6.957E-06 ± 3.008E-03
+    // Relative error z : -1.372E-05 ± 3.087E-03
+
+    // Code in comparison_edwalds.c
+    /* estimated_force.x *= 1.0015;
+    estimated_force.y *= 1.0015;
+    estimated_force.z *= 1.0015; */
+
     return estimated_force;
 
     /* return table[(int)floor((r_ij_x) / table_step) + table_size / 2]
@@ -298,37 +319,22 @@ Vec3 *edwald_summation(System *system, double *args)
                 .y = particles[i].y - particles[j].y,
                 .z = particles[i].z - particles[j].z});
 
-            /* Vec3 reciprocal_space_force = compute_reciprocal_space_force(
-                particles[i].x - particles[j].x,
-                particles[i].y - particles[j].y,
-                particles[i].z - particles[j].z); */
+            Vec3 reciprocal_space_force;
 
-            Vec3 reciprocal_space_force = tabulated_reciprocal_space_term((Vec3){
-                .x = particles[i].x - particles[j].x,
-                .y = particles[i].y - particles[j].y,
-                .z = particles[i].z - particles[j].z});
-
-            // Coorrection obtained by the study of mean and stdev
-            // on a dataset of trilinear approximation (L=2, table_size = 64).
-            // Relative error is:
-            // (reciprocal_space_force.a - real_space_force.a) / real_space_force.a
-            // with a ∈ {x,y,z}
-
-            // NO CORRECTION:
-            // Relative error x: -2.670E-03 ± 3.024E-03
-            // Relative error y: -2.643E-03 ± 3.001E-03
-            // Relative error z: -2.619E-03 ± 3.079E-03
-
-            // WITH CORRECTION:
-            // Relative error x: -4.148E-06 ± 3.032E-03
-            // Relative error y : -6.957E-06 ± 3.008E-03
-            // Relative error z : -1.372E-05 ± 3.087E-03
-
-            // Code in comparison_edwalds.c
-
-            reciprocal_space_force.x *= 1.00267;
-            reciprocal_space_force.y *= 1.00264;
-            reciprocal_space_force.z *= 1.00261;
+            if (USE_TABULATION_EDWALD_RECIPROCAL_SPACE)
+            {
+                reciprocal_space_force = tabulated_reciprocal_space_term((Vec3){
+                    .x = particles[i].x - particles[j].x,
+                    .y = particles[i].y - particles[j].y,
+                    .z = particles[i].z - particles[j].z});
+            }
+            else
+            {
+                reciprocal_space_force = compute_reciprocal_space_force((Vec3){
+                    particles[i].x - particles[j].x,
+                    particles[i].y - particles[j].y,
+                    particles[i].z - particles[j].z});
+            }
 
             tmp_forces[i].x += FORCE_TYPE_CONSTANT * particles[i].charge * particles[j].charge * (real_space_force.x + reciprocal_space_force.x);
             tmp_forces[i].y += FORCE_TYPE_CONSTANT * particles[i].charge * particles[j].charge * (real_space_force.y + reciprocal_space_force.y);
@@ -360,35 +366,43 @@ Vec3 *edwald_summation(System *system, double *args)
     return tmp_forces;
 }
 
-// PARALLELIZATION
-
+// PARALLELIZED VERSION
 void *partial_particle_for(void *args)
 {
-    int n_particles = (*(PartialForStruct *)args).n_particles;
-    Particle *particles = (*(PartialForStruct *)args).particles;
-    Vec3 *tmp_forces = (*(PartialForStruct *)args).tmp_forces;
-    int start_index = (*(PartialForStruct *)args).start_index;
-    int end_index = (*(PartialForStruct *)args).end_index;
+
+    PartialForStruct info = (*(PartialForStruct *)args);
+    int n_particles = info.n_particles;
+    Particle *particles = info.particles;
+    Vec3 *tmp_forces = info.tmp_forces;
+    int start_index = info.start_index;
+    int end_index = info.end_index;
 
     for (size_t i = start_index; i < end_index; i++)
     {
         for (size_t j = 0; j < n_particles; j++)
         {
-
             if (i == j) continue;
             Vec3 real_space_force = compute_real_space_force((Vec3){
                 .x = particles[i].x - particles[j].x,
                 .y = particles[i].y - particles[j].y,
                 .z = particles[i].z - particles[j].z});
 
-            Vec3 reciprocal_space_force = tabulated_reciprocal_space_term((Vec3){
-                .x = particles[i].x - particles[j].x,
-                .y = particles[i].y - particles[j].y,
-                .z = particles[i].z - particles[j].z});
+            Vec3 reciprocal_space_force;
 
-            reciprocal_space_force.x *= 1.00267;
-            reciprocal_space_force.y *= 1.00264;
-            reciprocal_space_force.z *= 1.00261;
+            if (USE_TABULATION_EDWALD_RECIPROCAL_SPACE)
+            {
+                reciprocal_space_force = tabulated_reciprocal_space_term((Vec3){
+                    .x = particles[i].x - particles[j].x,
+                    .y = particles[i].y - particles[j].y,
+                    .z = particles[i].z - particles[j].z});
+            }
+            else
+            {
+                reciprocal_space_force = compute_reciprocal_space_force((Vec3){
+                    particles[i].x - particles[j].x,
+                    particles[i].y - particles[j].y,
+                    particles[i].z - particles[j].z});
+            }
 
             tmp_forces[i].x += FORCE_TYPE_CONSTANT * particles[i].charge * particles[j].charge * (real_space_force.x + reciprocal_space_force.x);
             tmp_forces[i].y += FORCE_TYPE_CONSTANT * particles[i].charge * particles[j].charge * (real_space_force.y + reciprocal_space_force.y);
@@ -429,20 +443,18 @@ Vec3 *edwald_summation_parallelized(System *system, double *args)
         exit(EXIT_FAILURE);
     }
 
-    // Why I need an array?
-    // If you use always the same info variable each loop
-    // a new PartialForStruct struct is allocated and removed from the stack,
-    // resulting in having the same pointer passed to all the thread pointing each time at a new struct with
-    // different values of start_index and end_index.
-    // Depending on the order of the istruction executed by te cpu the result is
-    // umpredictable.
-
+    // Se non si facesse uso di un array di PartialForStruct a ogni ciclo:
+    // 1) un nuovo oggetto PartialForStruct allocato nello stack
+    // 2) indirizzo in memoria passato al thread
+    // 3) oggetto rimosso dallo stack perchè variabile locale
+    // Non essendoci altre vabili a ogni ciclo l'oggetto struct è allocato sempre nello stesso indirizzo
+    // causando un comportamento indefinito da parte dei thread, dipendentemente dall'ordine di esecuzione delle istruzioni
+    // il thread può leggere info diverse da quelle associate al ciclo in cui è stato creato.
     PartialForStruct infos[N_THREADS];
 
     int remainder = (int)N_PARTICLES % (int)N_THREADS;
-    for (size_t i = 0; i < N_THREADS; i++)
+    for (int i = 0; i < N_THREADS; i++)
     {
-
         infos[i] = (PartialForStruct){
             .start_index = (int)N_PARTICLES / (int)N_THREADS * i,
             .end_index = (i == (int)N_THREADS - 1) ? (int)N_PARTICLES / (int)N_THREADS * (i + 1) + remainder : (int)N_PARTICLES / (int)N_THREADS * (i + 1),

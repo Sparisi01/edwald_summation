@@ -10,12 +10,14 @@
 #define RAND_SEED 5
 #define SIGMA_VELOCITIES (sqrt(1))
 #define ALPHA (5.6 / CELL_LENGHT)
+// #define ALPHA 1e-8
 #define SIGMA (1 / (SQR_2 * ALPHA))
-#define N_PARTICLES 300
+#define N_PARTICLES 20
+#define USE_TABULATION_EDWALD_RECIPROCAL_SPACE 1
 #define N_K_RANGE 5
 #define FORCE_TYPE_CONSTANT 1 // F = FORCE_TYPE_CONSTANT * (Q1*Q2)/r^2
-#define RECIPROCAL_SPACE_TABLE_SIZE 32
+#define RECIPROCAL_SPACE_TABLE_SIZE 128
 #define LAMBDA 0 // Yukawa potential factor (0 = coulomb)
-#define USE_PARALLELIZATION 1
-#define N_THREADS 3
+#define USE_PARALLELIZATION 0
+#define N_THREADS 4
 #endif

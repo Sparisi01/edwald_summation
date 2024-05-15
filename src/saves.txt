@@ -1,6 +1,17 @@
 --------------------
-REAL SUM: 5.8931392702E+00
-RECIPROCAL SUM: -3.0415427650E+01
+N Particelle: 300
+Volume: 8.000000
+Δt, dt: 10.000000, 0.001000
+--------------------
+
+// VERSIONE PARALLELIZZATA
+--------------------
+Verlet time: 21 ms
+Totale estimated time: 0:3:30 [h:m:s]
+--------------------
+TEMPERATURE = 1.02302E+00 ± 1.40480E-02
+
+// VERSIONE NON PARALLELIZZATA
 --------------------
 Verlet time: 26 ms
 Totale estimated time: 0:4:22 [h:m:s]
