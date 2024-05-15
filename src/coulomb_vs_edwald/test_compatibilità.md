@@ -1,0 +1,55 @@
+# TEST
+
+## test compatibilità tra coulomb e edwald summation
+
+Parallelizzazione: off
+SEED: 3
+N Particelle: 2
+Volume: 8.000000
+Δt, dt: 8.000000, 0.001000
+
+NOTE: velocità iniziali nulle
+
+### COULOMB
+
+TEMPERATURE = 2.79758E-04 ± 1.38364E-04
+ENERGY = 9.69133E-03 ± 1.11906E-04
+PRESSURE = -3.37356E-102 ± 2.92139E-100
+
+### EDWALD REALE
+
+Table: 128
+Cutoff: off
+Alpha: 1e-8
+
+TEMPERATURE = 2.79758E-04 ± 1.38364E-04
+ENERGY = 9.69133E-03 ± 1.11906E-04
+PRESSURE = -3.37356E-102 ± 2.92139E-100
+
+### EDWALD RECIPROCO
+
+Table: 128
+Cutoff: off
+Alpha: 1e8
+
+TEMPERATURE = 1.63621E-04 ± 8.02923E-05
+ENERGY = 9.52521E-03 ± 2.86515E-04
+PRESSURE = -3.37356E-102 ± 2.92139E-100
+
+Table: off
+Cutoff: off
+Alpha: 1e8
+
+TEMPERATURE = 1.63621E-04 ± 8.02923E-05
+ENERGY = 9.52521E-03 ± 2.86515E-04
+PRESSURE = -3.37356E-102 ± 2.92139E-100
+
+---
+
+## TEST CON MULTIPLE CELLE IN COULOMB
+
+### coulomb
+
+T = 4.50274E-04 ± 2.75093E-04
+
+

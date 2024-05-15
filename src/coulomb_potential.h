@@ -7,7 +7,9 @@
 #include <math.h>
 #include <stdlib.h>
 
-Vec3 *coulomb_potential(System *system, double *args)
+#define CELLS_RANGE 0
+
+Vec3 *coulomb_force(System *system, double *args)
 {
 
     Particle *particles = system->particles;
@@ -31,27 +33,36 @@ Vec3 *coulomb_potential(System *system, double *args)
         for (size_t j = i + 1; j < n_particles; j++)
         {
 
-            Vec3 r_ij = {
-                .x = particles[i].x - particles[j].x,
-                .y = particles[i].y - particles[j].y,
-                .z = particles[i].z - particles[j].z};
+            for (int n_k_x = -CELLS_RANGE; n_k_x <= CELLS_RANGE; n_k_x++)
+            {
+                for (int n_k_y = -CELLS_RANGE; n_k_y <= CELLS_RANGE; n_k_y++)
+                {
+                    for (int n_k_z = -CELLS_RANGE; n_k_z <= CELLS_RANGE; n_k_z++)
+                    {
+                        Vec3 r_ij = {
+                            .x = particles[i].x - particles[j].x,
+                            .y = particles[i].y - particles[j].y,
+                            .z = particles[i].z - particles[j].z};
 
-            r_ij.x = r_ij.x - rint((r_ij.x) / CELL_LENGHT) * CELL_LENGHT;
-            r_ij.y = r_ij.y - rint((r_ij.y) / CELL_LENGHT) * CELL_LENGHT;
-            r_ij.z = r_ij.z - rint((r_ij.z) / CELL_LENGHT) * CELL_LENGHT;
+                        r_ij.x = r_ij.x - rint((r_ij.x) / CELL_LENGHT) * CELL_LENGHT + n_k_x * CELL_LENGHT;
+                        r_ij.y = r_ij.y - rint((r_ij.y) / CELL_LENGHT) * CELL_LENGHT + n_k_y * CELL_LENGHT;
+                        r_ij.z = r_ij.z - rint((r_ij.z) / CELL_LENGHT) * CELL_LENGHT + n_k_z * CELL_LENGHT;
 
-            double r_ij_mod = sqrt(r_ij.x * r_ij.x + r_ij.y * r_ij.y + r_ij.z * r_ij.z);
-            double mod3 = r_ij_mod * r_ij_mod * r_ij_mod;
-            Vec3 force_ij = {.x = r_ij.x / mod3, .y = r_ij.y / mod3, .z = r_ij.z / mod3};
+                        double r_ij_mod = sqrt(r_ij.x * r_ij.x + r_ij.y * r_ij.y + r_ij.z * r_ij.z);
+                        double mod3 = r_ij_mod * r_ij_mod * r_ij_mod;
+                        Vec3 force_ij = {.x = r_ij.x / mod3, .y = r_ij.y / mod3, .z = r_ij.z / mod3};
 
-            tmp_forces[i].x += FORCE_TYPE_CONSTANT * particles[i].charge * particles[j].charge * force_ij.x;
-            tmp_forces[i].y += FORCE_TYPE_CONSTANT * particles[i].charge * particles[j].charge * force_ij.y;
-            tmp_forces[i].z += FORCE_TYPE_CONSTANT * particles[i].charge * particles[j].charge * force_ij.z;
+                        tmp_forces[i].x += FORCE_TYPE_CONSTANT * particles[i].charge * particles[j].charge * force_ij.x;
+                        tmp_forces[i].y += FORCE_TYPE_CONSTANT * particles[i].charge * particles[j].charge * force_ij.y;
+                        tmp_forces[i].z += FORCE_TYPE_CONSTANT * particles[i].charge * particles[j].charge * force_ij.z;
 
-            // Use Newton third principle
-            tmp_forces[j].x -= FORCE_TYPE_CONSTANT * particles[i].charge * particles[j].charge * force_ij.x;
-            tmp_forces[j].y -= FORCE_TYPE_CONSTANT * particles[i].charge * particles[j].charge * force_ij.y;
-            tmp_forces[j].z -= FORCE_TYPE_CONSTANT * particles[i].charge * particles[j].charge * force_ij.z;
+                        // Use Newton third principle
+                        tmp_forces[j].x -= FORCE_TYPE_CONSTANT * particles[i].charge * particles[j].charge * force_ij.x;
+                        tmp_forces[j].y -= FORCE_TYPE_CONSTANT * particles[i].charge * particles[j].charge * force_ij.y;
+                        tmp_forces[j].z -= FORCE_TYPE_CONSTANT * particles[i].charge * particles[j].charge * force_ij.z;
+                    }
+                }
+            }
         }
     }
     return tmp_forces;

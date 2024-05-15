@@ -4,6 +4,7 @@
 #include <time.h>
 // commento
 #include "constants.h"
+#include "coulomb_potential.h"
 #include "edwald_summation.h"
 #include "observables.h"
 #include "statistic.h"
@@ -58,7 +59,7 @@ int main(int argc, char const *argv[])
 
     //----------------------------------------------
     double start_time = 0;
-    double end_time = 60;
+    double end_time = 8;
     double time_step = 1e-3;
 
     int n_time_step = (end_time - start_time) / time_step;
@@ -108,9 +109,13 @@ int main(int argc, char const *argv[])
         system.particles[i].y = randUnif(-CELL_LENGHT / 2, CELL_LENGHT / 2);
         system.particles[i].z = randUnif(-CELL_LENGHT / 2, CELL_LENGHT / 2);
 
-        system.particles[i].vx = randGauss(0, SIGMA_VELOCITIES);
-        system.particles[i].vy = randGauss(0, SIGMA_VELOCITIES);
-        system.particles[i].vz = randGauss(0, SIGMA_VELOCITIES);
+        // system.particles[i].vx = randGauss(0, SIGMA_VELOCITIES);
+        // system.particles[i].vy = randGauss(0, SIGMA_VELOCITIES);
+        // system.particles[i].vz = randGauss(0, SIGMA_VELOCITIES);
+
+        system.particles[i].vx = 0;
+        system.particles[i].vy = 0;
+        system.particles[i].vz = 0;
 
         system.particles[i].mass = 1;
         system.particles[i].charge = 0.1;
@@ -127,8 +132,8 @@ int main(int argc, char const *argv[])
     printf("--------------------\n");
 
     // Parallelized verison could not be used the first time due to the matrix compilation
-    system.forces = edwald_summation(&system, NULL);
-
+    // system.forces = edwald_summation(&system, NULL);
+    system.forces = coulomb_force(&system, NULL);
     writeParticlesPositions(system.particles, system.n_particles, file_start_particles_pos);
 
     int n_time_measure = 10;
@@ -149,14 +154,16 @@ int main(int argc, char const *argv[])
         observables.pressure[i] = 0;
 
         int result;
-        if (USE_PARALLELIZATION)
+        /* if (USE_PARALLELIZATION)
         {
             result = verletPropagationStep(&system, time_step, edwald_summation_parallelized, NULL);
         }
         else
         {
             result = verletPropagationStep(&system, time_step, edwald_summation, NULL);
-        }
+        } */
+
+        result = verletPropagationStep(&system, time_step, coulomb_force, NULL);
 
         if (result)
         {

@@ -36,7 +36,7 @@ int main(int argc, char const *argv[])
         values_y[i] = (table_value.y - exact_value.y) / exact_value.y;
         values_z[i] = (table_value.z - exact_value.z) / exact_value.z;
 
-        fprintf(table_error_file, "%lf %lf %lf %lf %lf %lf %lf\n", sqrt(rnd1 * rnd1 + rnd2 * rnd2 + rnd3 * rnd3), values_x[i], values_y[i], values_z[i], exact_value.x, exact_value.y, exact_value.z);
+        fprintf(table_error_file, "%lf %lf %lf %lf %lf %lf %lf %lf %lf %lf\n", sqrt(rnd1 * rnd1 + rnd2 * rnd2 + rnd3 * rnd3), values_x[i], values_y[i], values_z[i], rnd1, exact_value.x, rnd2, exact_value.y, rnd3, exact_value.z);
     }
 
     printf("Relative error x: %.3E ± %.3E\n", mean(values_x, 0, N_SAMPLES - 1), stddev(values_x, 0, N_SAMPLES - 1));

@@ -21,5 +21,5 @@ plot "../output/table_error_file.dat" using 1:2 pt 7 ps 0.5 lc 1 t "x component"
 "" using 1:4 pt 7 ps 0.5 lc 4 t "z component"
 
 unset yrange
-plot "../output/table_error_file.dat" using 1:5
+plot "../output/table_error_file.dat" using 5:6
 
