@@ -2,13 +2,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+
 // commento
 #include "constants.h"
 #include "coulomb_potential.h"
 #include "edwald_summation.h"
-#include "observables.h"
 #include "statistic.h"
 #include "structures.h"
+#include "thermodinamics.h"
 #include "verlet_propagation.h"
 
 int writeParticlesPositions(Particle *particles, int n_particles, FILE *file)
@@ -59,7 +60,7 @@ int main(int argc, char const *argv[])
 
     //----------------------------------------------
     double start_time = 0;
-    double end_time = 8;
+    double end_time = 0.5;
     double time_step = 1e-3;
 
     int n_time_step = (end_time - start_time) / time_step;
@@ -109,13 +110,9 @@ int main(int argc, char const *argv[])
         system.particles[i].y = randUnif(-CELL_LENGHT / 2, CELL_LENGHT / 2);
         system.particles[i].z = randUnif(-CELL_LENGHT / 2, CELL_LENGHT / 2);
 
-        // system.particles[i].vx = randGauss(0, SIGMA_VELOCITIES);
-        // system.particles[i].vy = randGauss(0, SIGMA_VELOCITIES);
-        // system.particles[i].vz = randGauss(0, SIGMA_VELOCITIES);
-
-        system.particles[i].vx = 0;
-        system.particles[i].vy = 0;
-        system.particles[i].vz = 0;
+        system.particles[i].vx = randGauss(0, SIGMA_VELOCITIES);
+        system.particles[i].vy = randGauss(0, SIGMA_VELOCITIES);
+        system.particles[i].vz = randGauss(0, SIGMA_VELOCITIES);
 
         system.particles[i].mass = 1;
         system.particles[i].charge = 0.1;
@@ -131,9 +128,17 @@ int main(int argc, char const *argv[])
     printf("Δt, dt: %lf, %lf\n", end_time - start_time, time_step);
     printf("--------------------\n");
 
-    // Parallelized verison could not be used the first time due to the matrix compilation
-    // system.forces = edwald_summation(&system, NULL);
-    system.forces = coulomb_force(&system, NULL);
+    if (USE_COULOMB)
+    {
+
+        system.forces = coulomb_force(&system, NULL);
+    }
+    else
+    {
+        // Parallelized verison could not be used the first time due to the matrix compilation
+        system.forces = edwald_summation(&system, NULL);
+    }
+
     writeParticlesPositions(system.particles, system.n_particles, file_start_particles_pos);
 
     int n_time_measure = 10;
@@ -154,16 +159,21 @@ int main(int argc, char const *argv[])
         observables.pressure[i] = 0;
 
         int result;
-        /* if (USE_PARALLELIZATION)
+        if (!USE_COULOMB)
         {
-            result = verletPropagationStep(&system, time_step, edwald_summation_parallelized, NULL);
+            if (USE_PARALLELIZATION)
+            {
+                result = verletPropagationStep(&system, time_step, edwald_summation_parallelized, NULL);
+            }
+            else
+            {
+                result = verletPropagationStep(&system, time_step, edwald_summation, NULL);
+            }
         }
         else
         {
-            result = verletPropagationStep(&system, time_step, edwald_summation, NULL);
-        } */
-
-        result = verletPropagationStep(&system, time_step, coulomb_force, NULL);
+            result = verletPropagationStep(&system, time_step, coulomb_force, NULL);
+        }
 
         if (result)
         {
@@ -172,11 +182,10 @@ int main(int argc, char const *argv[])
         }
 
         // Exclude the first one because it contains the edwald table generation
-        if (i < n_time_measure && i != 0)
-        {
-            sum_comput_times += clock() - comput_time_start;
-        }
-        if (i == n_time_measure)
+
+        sum_comput_times += clock() - comput_time_start;
+
+        if (i == n_time_measure - 1)
         {
             double time_spent = (double)sum_comput_times / n_time_measure;
             int tot_time_sec = time_spent * n_time_step / CLOCKS_PER_SEC;
@@ -186,6 +195,9 @@ int main(int argc, char const *argv[])
             printf("--------------------\nVerlet time: %d ms\nTotale estimated time: %d:%d:%d [h:m:s]\n--------------------\n", (int)time_spent, h, min, sec);
         }
     }
+
+    printf("CPU time for cicle: %lf s\n", (double)sum_comput_times / CLOCKS_PER_SEC / n_time_step);
+    printf("--------------------\n");
 
     writeParticlesPositions(system.particles, system.n_particles, file_end_particles_pos);
 

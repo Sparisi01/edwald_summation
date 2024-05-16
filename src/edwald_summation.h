@@ -4,6 +4,7 @@
 
 #include <math.h>
 #include <pthread.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
 
@@ -314,26 +315,21 @@ Vec3 *edwald_summation(System *system, double *args)
         for (size_t j = i + 1; j < n_particles; j++)
         {
 
-            Vec3 real_space_force = compute_real_space_force((Vec3){
+            Vec3 r_ij = {
                 .x = particles[i].x - particles[j].x,
                 .y = particles[i].y - particles[j].y,
-                .z = particles[i].z - particles[j].z});
+                .z = particles[i].z - particles[j].z};
 
+            Vec3 real_space_force = compute_real_space_force(r_ij);
             Vec3 reciprocal_space_force;
 
             if (USE_TABULATION_EDWALD_RECIPROCAL_SPACE)
             {
-                reciprocal_space_force = tabulated_reciprocal_space_term((Vec3){
-                    .x = particles[i].x - particles[j].x,
-                    .y = particles[i].y - particles[j].y,
-                    .z = particles[i].z - particles[j].z});
+                reciprocal_space_force = tabulated_reciprocal_space_term(r_ij);
             }
             else
             {
-                reciprocal_space_force = compute_reciprocal_space_force((Vec3){
-                    particles[i].x - particles[j].x,
-                    particles[i].y - particles[j].y,
-                    particles[i].z - particles[j].z});
+                reciprocal_space_force = compute_reciprocal_space_force(r_ij);
             }
 
             tmp_forces[i].x += FORCE_TYPE_CONSTANT * particles[i].charge * particles[j].charge * (real_space_force.x + reciprocal_space_force.x);

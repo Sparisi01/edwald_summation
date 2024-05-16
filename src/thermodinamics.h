@@ -1,7 +1,10 @@
+#include "constants.h"
 #include "structures.h"
+#include <math.h>
+#include <stdlib.h>
 
-#ifndef OBSERVABLES_H
-#define OBSERVABLES_H
+#ifndef THERMODINAMICS_H
+#define THERMODINAMICS_H
 
 double kinetic_energy(Particle *particles, int n_particles)
 {

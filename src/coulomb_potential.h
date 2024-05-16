@@ -7,7 +7,7 @@
 #include <math.h>
 #include <stdlib.h>
 
-#define CELLS_RANGE 0
+#define CELLS_RANGE 5
 
 Vec3 *coulomb_force(System *system, double *args)
 {
@@ -28,17 +28,20 @@ Vec3 *coulomb_force(System *system, double *args)
         tmp_forces[i].z = 0;
     }
 
-    for (size_t i = 0; i < n_particles - 1; i++)
+    for (size_t i = 0; i < n_particles; i++)
     {
-        for (size_t j = i + 1; j < n_particles; j++)
+        for (size_t j = i; j < n_particles; j++)
         {
-
             for (int n_k_x = -CELLS_RANGE; n_k_x <= CELLS_RANGE; n_k_x++)
             {
                 for (int n_k_y = -CELLS_RANGE; n_k_y <= CELLS_RANGE; n_k_y++)
                 {
                     for (int n_k_z = -CELLS_RANGE; n_k_z <= CELLS_RANGE; n_k_z++)
                     {
+
+                        // Particle i == j must be removed only in the (0,0,0) cell
+                        if (i == j && n_k_x == 0 && n_k_y == 0 && n_k_z == 0) continue;
+
                         Vec3 r_ij = {
                             .x = particles[i].x - particles[j].x,
                             .y = particles[i].y - particles[j].y,
@@ -55,6 +58,9 @@ Vec3 *coulomb_force(System *system, double *args)
                         tmp_forces[i].x += FORCE_TYPE_CONSTANT * particles[i].charge * particles[j].charge * force_ij.x;
                         tmp_forces[i].y += FORCE_TYPE_CONSTANT * particles[i].charge * particles[j].charge * force_ij.y;
                         tmp_forces[i].z += FORCE_TYPE_CONSTANT * particles[i].charge * particles[j].charge * force_ij.z;
+
+                        // NO third principle if the particle is the same
+                        if (i == j) continue;
 
                         // Use Newton third principle
                         tmp_forces[j].x -= FORCE_TYPE_CONSTANT * particles[i].charge * particles[j].charge * force_ij.x;
