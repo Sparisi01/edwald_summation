@@ -8,6 +8,6 @@
 
 #define POT_TYPE 1
 
-#define RAND_SEED 1
+#define RAND_SEED 7
 
 #endif
