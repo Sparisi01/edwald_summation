@@ -5,7 +5,7 @@
             "includePath": [
                 "${workspaceFolder}/**",
                 "${workspaceFolder}/src",
-                "${workspaceFolder}/src/forces_functions"
+                "${workspaceFolder}/src/includes"
             ],
             "defines": [
                 "_DEBUG",
@@ -16,7 +16,7 @@
             "compilerPath": "C:/msys64/mingw64/bin/gcc.exe",
             "cStandard": "c23",
             "cppStandard": "c++23",
-            "intelliSenseMode": "windows-gcc-x64"
+            "intelliSenseMode": "${default}"
         }
     ],
     "version": 4

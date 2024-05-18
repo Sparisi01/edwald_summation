@@ -10,7 +10,9 @@
     "edwald_summation.h": "c",
     "interpolation.h": "c",
     "structures.h": "c",
-    "coulomb_potential.h": "c"
+    "coulomb_potential.h": "c",
+    "algorithm": "c",
+    "tgmath.h": "c"
   },
   "C_Cpp.errorSquiggles": "enabled"
 }

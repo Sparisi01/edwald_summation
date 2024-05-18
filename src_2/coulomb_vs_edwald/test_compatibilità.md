@@ -1,0 +1,82 @@
+# TEST
+
+## test compatibilità tra coulomb e edwald summation
+
+Parallelizzazione: off
+SEED: 3
+N Particelle: 2
+Volume: 8.000000
+Δt, dt: 8.000000, 0.001000
+
+NOTE: velocità iniziali nulle
+
+### COULOMB
+
+TEMPERATURE = 2.79758E-04 ± 1.38364E-04
+ENERGY = 9.69133E-03 ± 1.11906E-04
+PRESSURE = -3.37356E-102 ± 2.92139E-100
+
+### EDWALD REALE
+
+Table: 128
+Cutoff: off
+Alpha: 1e-8
+
+TEMPERATURE = 2.79758E-04 ± 1.38364E-04
+ENERGY = 9.69133E-03 ± 1.11906E-04
+PRESSURE = -3.37356E-102 ± 2.92139E-100
+
+### EDWALD RECIPROCO
+
+Table: 128
+Cutoff: off
+Alpha: 1e8
+
+TEMPERATURE = 1.63621E-04 ± 8.02923E-05
+ENERGY = 9.52521E-03 ± 2.86515E-04
+PRESSURE = -3.37356E-102 ± 2.92139E-100
+
+Table: off
+Cutoff: off
+Alpha: 1e8
+
+TEMPERATURE = 1.63621E-04 ± 8.02923E-05
+ENERGY = 9.52521E-03 ± 2.86515E-04
+PRESSURE = -3.37356E-102 ± 2.92139E-100
+
+---
+
+## TEST CON MULTIPLE CELLE IN COULOMB
+
+### EDWALD
+
+TEMPERATURE = 8.13885E-03 ± 1.80667E-03
+ENERGY = 1.46342E+01 ± 4.17951E-01
+PRESSURE = -3.37356E-102 ± 2.92139E-100
+
+### EDWALD approssimato
+
+TEMPERATURE = 8.12600E-03 ± 1.79966E-03
+ENERGY = 1.46325E+01 ± 4.16455E-01
+PRESSURE = -3.37356E-102 ± 2.92139E-100
+
+---
+
+alpha 1/L
+TEMPERATURE = 6.68866E-03 ± 9.16045E-04
+ENERGY = 1.42957E+01 ± 1.65077E-01
+PRESSURE = -3.37356E-102 ± 2.92139E-100
+
+Parallelizzato
+TEMPERATURE = 6.68866E-03 ± 9.16045E-04
+ENERGY = 1.42957E+01 ± 1.65077E-01
+PRESSURE = -3.37356E-102 ± 2.92139E-100
+
+### coulomb N = 10
+
+TEMPERATURE = 6.55482E-03 ± 8.51230E-04
+ENERGY = 1.43029E+01 ± 1.65257E-01
+PRESSURE = -3.37356E-102 ± 2.92139E-100
+
+per alpha 1/L i risultati risultano compatibili tra coulomb ed edwald summation
+Il contributo di edwald è dell'ordine di un millesimo quello di coulomb.
