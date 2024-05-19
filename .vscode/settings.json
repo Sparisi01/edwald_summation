@@ -13,7 +13,8 @@
     "coulomb_potential.h": "c",
     "algorithm": "c",
     "tgmath.h": "c",
-    "complex": "cpp"
+    "complex": "cpp",
+    "statistic.h": "c"
   },
   "C_Cpp.errorSquiggles": "enabled"
 }

@@ -22,13 +22,13 @@ double self_potential(System *system, double ALPHA)
     return sum * ALPHA / SQR_PI;
 }
 
-double getEdwaldPotential(System *system)
+double getEdwaldPotentialCoulomb(System *system)
 {
-    double short_range = real_space_potential(system, _ALPHA);
-    double long_range = reciprocal_space_potential(system, _ALPHA);
+    double short_range = real_space_potential_coulomb(system, _ALPHA);
+    double long_range = reciprocal_space_potential_coulomb(system, _ALPHA);
     double self = self_potential(system, _ALPHA);
 
-    return short_range + long_range - self;
+    return (short_range + long_range - self) * POT_TYPE;
 }
 
 Vec3 *getEdwaldForces(System *system)

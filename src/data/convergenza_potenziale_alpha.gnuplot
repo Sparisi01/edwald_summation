@@ -1,3 +1,3 @@
 set datafile separator ";"
 
-plot "alpha_variabile.csv" using 1:2
+plot "range_variabile_3.csv" using 1:2

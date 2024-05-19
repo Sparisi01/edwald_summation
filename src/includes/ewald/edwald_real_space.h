@@ -8,7 +8,7 @@
 
 double _CUTOFF = INFINITY;
 
-double real_space_potential(System *s, double ALPHA)
+double real_space_potential_coulomb(System *s, double ALPHA)
 {
     double sum = 0;
     for (size_t i = 0; i < s->n_particles - 1; i++)
