@@ -8,14 +8,16 @@
 #include "includes/statistic.h"
 #include <math.h>
 
-double _CELL_LENGHT = 4.;
+int _N_PARTICLES = 1000;
+double _DENSITY = 1;
+double _CELL_LENGHT = 2;
 double _SIGMA_VELOCITIES = 1.;
 
 int main(int argc, char const *argv[])
 {
     srand(RAND_SEED);
     System system;
-    system.n_particles = 1000;
+    system.n_particles = _N_PARTICLES / _DENSITY;
     system.cell_lenght = _CELL_LENGHT;
     system.particles = (Particle *)malloc(sizeof(Particle) * system.n_particles);
     if (!system.particles)
@@ -44,18 +46,17 @@ int main(int argc, char const *argv[])
 
     // DO THINGS
     FILE *file = fopen("./data/range_variabile_3.csv", "w");
-    _CUTOFF = _CELL_LENGHT / 2;
-    _ALPHA = 3.5 / _CUTOFF;
+    //_CUTOFF = _CELL_LENGHT / 2;
+    _ALPHA = 5;
 
     // Stima errore se particelle disposte casualmente
 
     double max_error_short = erfc(_ALPHA * _CUTOFF) / _CUTOFF;
-
     double volume_esterno_sfera = pow(_CELL_LENGHT, 3) - 4. / 3. * PI * pow(_CELL_LENGHT / 2., 3);
     double n_interazioni = system.n_particles * (system.n_particles - 1) / 2.;
     printf("Stima errore short: %.5E\n", max_error_short * n_interazioni * volume_esterno_sfera);
 
-    for (size_t i = 0; i < 20; i++)
+    for (size_t i = 0; i < 25; i++)
     {
         double pot = getEdwaldPotential(&system);
         fprintf(file, "%d;%lf\n", i, pot);

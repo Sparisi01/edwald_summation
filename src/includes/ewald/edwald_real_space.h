@@ -33,8 +33,6 @@ double real_space_potential(System *s, double ALPHA)
             sum += (s->particles[i].charge * s->particles[j].charge) * erfc(ALPHA * r_ij_mod) / r_ij_mod;
         }
     }
-
-    // printf("MIN: %.5E\n", min_keep_track);
     return sum;
 }
 

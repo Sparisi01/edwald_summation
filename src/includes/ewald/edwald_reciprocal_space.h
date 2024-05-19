@@ -28,11 +28,12 @@ double reciprocal_space_potential(System *s, double ALPHA)
     }
 
     // Compute the structural factor for all K-vectors
+
     for (size_t i = 0; i < s->n_particles; i++)
     {
-        double complex e_x = cos(s->particles[i].x) + I * sin(s->particles[i].x);
-        double complex e_y = cos(s->particles[i].y) + I * sin(s->particles[i].y);
-        double complex e_z = cos(s->particles[i].z) + I * sin(s->particles[i].z);
+        double complex e_x = cexp(I * 2 * PI / s->cell_lenght * s->particles[i].x);
+        double complex e_y = cexp(I * 2 * PI / s->cell_lenght * s->particles[i].y);
+        double complex e_z = cexp(I * 2 * PI / s->cell_lenght * s->particles[i].z);
 
         double precompure_pow_x[2 * _K_RANGE + 1];
         double precompure_pow_y[2 * _K_RANGE + 1];
@@ -69,15 +70,15 @@ double reciprocal_space_potential(System *s, double ALPHA)
             {
                 if (k_x == 0 && k_y == 0 && k_z == 0) continue;
 
-                double k_mod2 = k_x * k_x + k_y * k_y + k_z * k_z;
+                double k_mod2 = (k_x * k_x + k_y * k_y + k_z * k_z) * (2 * PI / s->cell_lenght) * (2 * PI / s->cell_lenght);
                 double tmp_exp = exp(-k_mod2 / (4 * ALPHA * ALPHA)) / k_mod2;
-                sum += tmp_exp * pow(cabs(structure_factor[k_x + _K_RANGE][k_y + _K_RANGE][k_z + _K_RANGE]), 2);
+                sum += tmp_exp * (structure_factor[k_x + _K_RANGE][k_y + _K_RANGE][k_z + _K_RANGE] * conj(structure_factor[k_x + _K_RANGE][k_y + _K_RANGE][k_z + _K_RANGE]));
                 C += tmp_exp;
             }
         }
     }
 
-    return (4 * PI / pow(s->cell_lenght, 3)) * 0.5 * (sum);
+    return (4 * PI / pow(s->cell_lenght, 3)) * 0.5 * (sum + C);
 }
 
 Vec3 reciprocal_space_force()
