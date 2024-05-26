@@ -5,12 +5,12 @@
 #include <tgmath.h>
 
 #include "includes/complex_utils.h"
-#include "includes/coulomb/coulomb_potential.h"
 #include "includes/ewald/edwald.h"
+#include "includes/potentials/coulomb_potential.h"
 #include "includes/statistic.h"
 
 int _N_PARTICLES = 100;
-double _DENSITY = 2;
+double _DENSITY = 0.01;
 double _CELL_LENGHT = 1;
 double _SIGMA_VELOCITIES = 1.;
 
@@ -30,7 +30,7 @@ int main(int argc, char const *argv[])
 {
     srand(RAND_SEED);
     System system;
-    system.n_particles = _N_PARTICLES / _DENSITY;
+    system.n_particles = _N_PARTICLES;
     system.cell_lenght = _CELL_LENGHT;
     system.particles = (Particle *)malloc(sizeof(Particle) * system.n_particles);
     if (!system.particles)
@@ -60,9 +60,9 @@ int main(int argc, char const *argv[])
     writeParticlesPositions(system.particles, system.n_particles, file2);
     // DO THINGS
     FILE *file = fopen("./data/range_variabile_3.csv", "w");
-    _CUTOFF = _CELL_LENGHT / 2;
-    _ALPHA = 3 / _CUTOFF;
-
+    _CUTOFF = _CELL_LENGHT/2;
+    _ALPHA = 3.5 / _CUTOFF;
+    //_ALPHA = 1e8;
     // Stima errore se particelle disposte casualmente
 
     double max_error_short = erfc(_ALPHA * _CUTOFF) / _CUTOFF;
@@ -71,21 +71,21 @@ int main(int argc, char const *argv[])
     printf("Stima errore totale: %.5E\n", max_error_short * n_interazioni * volume_esterno_sfera);
     printf("Stima errore singolo: %.5E\n", max_error_short);
 
-    for (size_t i = 0; i < 20; i++)
+    for (size_t i = 0; i < 10; i++)
     {
         _K_RANGE = i;
-        double pot = getEdwaldPotential(&system);
+        // double pot = getEdwaldPotentialYukawa(&system, 1);
         // fprintf(file, "%d;%lf\n", i, pot);
-
-        printf("ED: %.5E\n", pot);
+        double pot = getEdwaldPotentialCoulomb(&system);
+        printf("ED: %.10E\n", pot);
     }
 
     for (size_t i = 0; i < 10; i++)
     {
         _R_RANGE = i;
-        // double pot = getCoulombPotential(&system);
         double pot = getCoulombPotential(&system);
+        // double pot = getYukawaPotential(&system, 1);
         fprintf(file, "%d;%lf\n", i, pot);
-        printf("C: %.5E\n", pot);
+        printf("C: %.10E\n", pot);
     }
 }

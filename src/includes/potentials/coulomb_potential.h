@@ -47,7 +47,7 @@ double getCoulombPotential(System *s)
     return sum * POT_TYPE;
 }
 
-double getYukawaPotential(System *s, double lambda)
+double getYukawaPotential(System *s, double LAMBDA)
 {
     double sum = 0;
 
@@ -76,7 +76,9 @@ double getYukawaPotential(System *s, double lambda)
 
                         double r_ij_mod = sqrt(r_ij.x * r_ij.x + r_ij.y * r_ij.y + r_ij.z * r_ij.z);
 
-                        sum += (s->particles[i].charge * s->particles[j].charge) / r_ij_mod * exp(-lambda * r_ij_mod);
+                        if (r_ij_mod > (_R_RANGE + 0.5) * s->cell_lenght) continue;
+
+                        sum += (s->particles[i].charge * s->particles[j].charge) / r_ij_mod * exp(-LAMBDA * r_ij_mod);
                     }
                 }
             }

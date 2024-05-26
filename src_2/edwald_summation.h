@@ -44,8 +44,6 @@ Vec3 compute_reciprocal_space_force(Vec3 r_ij)
 
                 // Coulomb
                 long_distance_force *= exp(-(k_vec_mag2) / (4 * ALPHA * ALPHA)) / (k_vec_mag2)*sin(dot_prod_pos_k);
-                // Yukawa
-                // long_distance_force *= exp(-(k_vec_mag2 + LAMBDA * LAMBDA) / (4 * ALPHA * ALPHA)) / (k_vec_mag2 + LAMBDA * LAMBDA) * sin(dot_prod_pos_k);
 
                 // tmp_forces on particle i due to j copies
                 force.x += FORCE_TYPE_CONSTANT * k_x * long_distance_force;
