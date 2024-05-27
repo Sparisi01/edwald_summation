@@ -1,16 +1,22 @@
 #ifndef EDWALD_RECIPROCAL_SPACE_H
 #define EDWALD_RECIPROCAL_SPACE_H
 
-#include "../complex_utils.h"
 #include "../structures.h"
 #include <complex.h>
+#include <float.h>
 #include <math.h>
 #include <stdlib.h>
 
-int _K_RANGE = 0;
+unsigned int _K_RANGE = 0;
 
-double reciprocal_space_potential_coulomb(System *s, double ALPHA)
+double reciprocal_space_coulomb_energy(System *s, double ALPHA)
 {
+    if (ALPHA <= 0)
+    {
+        printf("ERROR: ALPHA must be greater than 0");
+        exit(EXIT_FAILURE);
+    }
+
     // All reciprocal lattice frequencies are multiple of the base frequency 2π/L
     double base_frequency = (2 * PI / s->cell_lenght);
 
@@ -49,7 +55,7 @@ double reciprocal_space_potential_coulomb(System *s, double ALPHA)
             precompure_pow_z[j + _K_RANGE] = cpow(e_z, j);
         }
 
-        for (int k_x = -_K_RANGE; k_x <= _K_RANGE; k_x++)
+        for (int k_x = -_K_RANGE; k_x << _K_RANGE; k_x++)
         {
             for (int k_y = -_K_RANGE; k_y <= _K_RANGE; k_y++)
             {
@@ -79,7 +85,7 @@ double reciprocal_space_potential_coulomb(System *s, double ALPHA)
                 if (k_x == 0 && k_y == 0 && k_z == 0) continue;
 
                 double k_mod2 = (k_x * k_x + k_y * k_y + k_z * k_z) * (base_frequency * base_frequency);
-                double str_quad = (structure_factor[k_x + _K_RANGE][k_y + _K_RANGE][k_z + _K_RANGE] * conj(structure_factor[k_x + _K_RANGE][k_y + _K_RANGE][k_z + _K_RANGE])); // |S(k)|² = S(k) × S(k)*
+                double str_quad = (structure_factor[k_x + _K_RANGE][k_y + _K_RANGE][k_z + _K_RANGE] * conj(structure_factor[k_x + _K_RANGE][k_y + _K_RANGE][k_z + _K_RANGE])); // |S(k)|²
                 potential_sum += exp(-(k_mod2) / (4 * ALPHA * ALPHA)) / k_mod2 * str_quad;
             }
         }
@@ -87,6 +93,10 @@ double reciprocal_space_potential_coulomb(System *s, double ALPHA)
 
     double volume = pow(s->cell_lenght, 3);
     return (4 * PI / volume) * 0.5 * potential_sum;
+
+ALPHA_ERROR:
+    printf("ALPHA must be greater than 0\n");
+    exit(EXIT_FAILURE);
 }
 
 double reciprocal_space_potential_yukawa(System *s, double ALPHA, double LAMBDA)
@@ -171,8 +181,9 @@ double reciprocal_space_potential_yukawa(System *s, double ALPHA, double LAMBDA)
     return (4 * PI / volume) * 0.5 * sum;
 }
 
-Vec3 reciprocal_space_force()
+Vec3 *reciprocal_space_force()
 {
+    return NULL;
 }
 
 #endif

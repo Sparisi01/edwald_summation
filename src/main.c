@@ -4,10 +4,9 @@
 #include <stdlib.h>
 #include <tgmath.h>
 
-#include "includes/complex_utils.h"
 #include "includes/ewald/edwald.h"
 #include "includes/potentials/coulomb_potential.h"
-#include "includes/statistic.h"
+#include "includes/utils/statistic.h"
 
 int _N_PARTICLES = 100;
 double _DENSITY = 0.01;
@@ -60,7 +59,7 @@ int main(int argc, char const *argv[])
     writeParticlesPositions(system.particles, system.n_particles, file2);
     // DO THINGS
     FILE *file = fopen("./data/range_variabile_3.csv", "w");
-    _CUTOFF = _CELL_LENGHT/2;
+    _CUTOFF = _CELL_LENGHT / 2;
     _ALPHA = 3.5 / _CUTOFF;
     //_ALPHA = 1e8;
     // Stima errore se particelle disposte casualmente
@@ -76,7 +75,7 @@ int main(int argc, char const *argv[])
         _K_RANGE = i;
         // double pot = getEdwaldPotentialYukawa(&system, 1);
         // fprintf(file, "%d;%lf\n", i, pot);
-        double pot = getEdwaldPotentialCoulomb(&system);
+        double pot = ewald_energy(&system);
         printf("ED: %.10E\n", pot);
     }
 

@@ -44,7 +44,7 @@ double getCoulombPotential(System *s)
         }
     }
 
-    return sum * POT_TYPE;
+    return sum;
 }
 
 double getYukawaPotential(System *s, double LAMBDA)
@@ -85,7 +85,7 @@ double getYukawaPotential(System *s, double LAMBDA)
         }
     }
 
-    return sum * POT_TYPE;
+    return sum;
 }
 
 #endif // COULMB_POTENTIAL_H

@@ -3,14 +3,18 @@
 
 #include "../constants.h"
 #include "../structures.h"
+#include "../utils/lattice.h"
 #include <math.h>
 #include <stdlib.h>
 
-double _CUTOFF = NAN;
+double _CUTOFF = INFINITY;
 
-double real_space_potential_coulomb(System *s, double ALPHA)
+double real_space_coulomb_energy(System *s, double ALPHA)
 {
-    double sum = 0;
+    if (ALPHA <= 0) goto ALPHA_ERROR;
+    if (_CUTOFF <= 0) goto CUTOFF_ERROR;
+
+    double energy_sum = 0;
     double qi, qj;
 
     // Using the fact that Uᵢⱼ = Uⱼᵢ sum over i and j with j>i and remove the 1/2 factor.
@@ -29,19 +33,28 @@ double real_space_potential_coulomb(System *s, double ALPHA)
             };
 
             // First image convention
-            r_ij.x = r_ij.x - rint((r_ij.x) / s->cell_lenght) * s->cell_lenght;
+            minimum_image_convention(&r_ij, s->cell_lenght);
+            /* r_ij.x = r_ij.x - rint((r_ij.x) / s->cell_lenght) * s->cell_lenght;
             r_ij.y = r_ij.y - rint((r_ij.y) / s->cell_lenght) * s->cell_lenght;
-            r_ij.z = r_ij.z - rint((r_ij.z) / s->cell_lenght) * s->cell_lenght;
+            r_ij.z = r_ij.z - rint((r_ij.z) / s->cell_lenght) * s->cell_lenght; */
 
             double r_ij_mod = sqrt(r_ij.x * r_ij.x + r_ij.y * r_ij.y + r_ij.z * r_ij.z);
 
             // In first image convention _CUTOFF must be less than L/2
-            if (r_ij_mod > _CUTOFF) continue;
+            if (r_ij_mod > _CUTOFF || r_ij_mod == 0) continue;
 
-            sum += (qi * qj) * erfc(ALPHA * r_ij_mod) / r_ij_mod;
+            energy_sum += (qi * qj) * erfc(ALPHA * r_ij_mod) / r_ij_mod;
         }
     }
-    return sum;
+    return energy_sum;
+
+ALPHA_ERROR:
+    printf("ERROR: ALPHA must be greater than 0");
+    exit(EXIT_FAILURE);
+
+CUTOFF_ERROR:
+    printf("ERROR: _CUTOFF must be greater than 0");
+    exit(EXIT_FAILURE);
 }
 
 double real_space_potential_yukawa(System *s, double ALPHA, double LAMBDA)
@@ -84,6 +97,7 @@ double real_space_potential_yukawa(System *s, double ALPHA, double LAMBDA)
 
 Vec3 *real_space_force(System *s)
 {
+    return NULL;
 }
 
 #endif // EDWALD_REal_SPACE_H
