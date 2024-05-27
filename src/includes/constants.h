@@ -10,19 +10,9 @@
 #define RAND_SEED 1
 
 const unsigned int _N_ELEMENTS = 118;
-// from https://www.plaintextlist.com/science/list_of_chemical_elements_(symbols)
-const char elements_symbol[_N_ELEMENTS][2] =
-    {' H', 'He', 'Li', 'Be', ' B', ' C', ' N', ' O', ' F', 'Ne', 'Na', 'Mg', 'Al', 'Si', ' P', ' S',
-     'Cl', 'Ar', ' K', 'Ca', 'Sc', 'Ti', ' V', 'Cr', 'Mn', 'Fe', 'Co', 'Ni', 'Cu', 'Zn', 'Ga', 'Ge',
-     'As', 'Se', 'Br', 'Kr', 'Rb', 'Sr', ' Y', 'Zr', 'Nb', 'Mo', 'Tc', 'Ru', 'Rh', 'Pd', 'Ag', 'Cd',
-     'In', 'Sn', 'Sb', 'Te', ' I', 'Xe', 'Cs', 'Ba', 'La', 'Ce', 'Pr', 'Nd', 'Pm', 'Sm', 'Eu', 'Gd',
-     'Tb', 'Dy', 'Ho', 'Er', 'Tm', 'Yb', 'Lu', 'Hf', 'Ta', ' W', 'Re', 'Os', 'Ir', 'Pt', 'Au', 'Hg',
-     'Tl', 'Pb', 'Bi', 'Po', 'At', 'Rn', 'Fr', 'Ra', 'Ac', 'Th', 'Pa', ' U', 'Np', 'Pu', 'Am', 'Cm',
-     'Bk', 'Cf', 'Es', 'Fm', 'Md', 'No', 'Lr', 'Rf', 'Db', 'Sg', 'Bh', 'Hs', 'Mt', 'Ds', 'Rg', 'Cn',
-     'Nh', 'Fl', 'Mc', 'Lv', 'Ts', 'Og'};
 
 // from https://www.qmul.ac.uk/sbcs/iupac/AtWt/index.html#02 (2019)
-const double atomic_masses[_N_ELEMENTS] =
+double atomic_masses[118] =
     {1.008, 4.002, 6.94, 9.012, 10.81, 12.011, 14.007, 15.999,
      18.998, 20.1797, 22.989, 24.305, 26.981, 28.085, 30.973, 32.06,
      35.45, 39.948, 39.0983, 40.078, 44.955, 47.867, 50.9415, 51.9961,
@@ -39,26 +29,36 @@ const double atomic_masses[_N_ELEMENTS] =
      270., 269., 270., 270., 278., 281., 281., 285.,
      286., 289., 289., 293., 293., 294.};
 
+char elements_symbol[118][2] =
+    {" H", "He", "Li", "Be", " B", " C", " N", " O", " F", "Ne", "Na", "Mg", "Al", "Si", " P", " S",
+     "Cl", "Ar", " K", "Ca", "Sc", "Ti", " V", "Cr", "Mn", "Fe", "Co", "Ni", "Cu", "Zn", "Ga", "Ge",
+     "As", "Se", "Br", "Kr", "Rb", "Sr", " Y", "Zr", "Nb", "Mo", "Tc", "Ru", "Rh", "Pd", "Ag", "Cd",
+     "In", "Sn", "Sb", "Te", " I", "Xe", "Cs", "Ba", "La", "Ce", "Pr", "Nd", "Pm", "Sm", "Eu", "Gd",
+     "Tb", "Dy", "Ho", "Er", "Tm", "Yb", "Lu", "Hf", "Ta", " W", "Re", "Os", "Ir", "Pt", "Au", "Hg",
+     "Tl", "Pb", "Bi", "Po", "At", "Rn", "Fr", "Ra", "Ac", "Th", "Pa", " U", "Np", "Pu", "Am", "Cm",
+     "Bk", "Cf", "Es", "Fm", "Md", "No", "Lr", "Rf", "Db", "Sg", "Bh", "Hs", "Mt", "Ds", "Rg", "Cn",
+     "Nh", "Fl", "Mc", "Lv", "Ts", "Og"};
+
 double getElementMass(int n)
 {
     if (n > _N_ELEMENTS)
     {
-        printf("%d must be in [1,%d]", n, _N_ELEMENTS);
+        printf("ERROR: %d must be in [1,%d]", n, _N_ELEMENTS);
         exit(EXIT_FAILURE);
     }
 
-    return atomic_masses[n + 1];
+    return atomic_masses[n - 1];
 }
 
 void printElementSymbol(int n)
 {
     if (n > _N_ELEMENTS)
     {
-        printf("%d must be in [1,%d]", n, _N_ELEMENTS);
+        printf("ERROR: n must be in [1,%d]", _N_ELEMENTS);
         exit(EXIT_FAILURE);
     }
 
-    printf(elements_symbol[n]);
+    printf("%c%c", elements_symbol[n - 1][0], elements_symbol[n - 1][1]);
 }
 
 #endif

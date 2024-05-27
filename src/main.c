@@ -27,6 +27,7 @@ int writeParticlesPositions(Particle *particles, int n_particles, FILE *file)
 
 int main(int argc, char const *argv[])
 {
+    printElementSymbol(200);
     srand(RAND_SEED);
     System system;
     system.n_particles = _N_PARTICLES;
