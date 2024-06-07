@@ -61,4 +61,10 @@ void printElementSymbol(int n)
     printf("%c%c", elements_symbol[n - 1][0], elements_symbol[n - 1][1]);
 }
 
+void printlnElementSymbol(int n)
+{
+    printElementSymbol(n);
+    printf("\n");
+}
+
 #endif

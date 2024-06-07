@@ -27,7 +27,7 @@ int writeParticlesPositions(Particle *particles, int n_particles, FILE *file)
 
 int main(int argc, char const *argv[])
 {
-    printElementSymbol(107);
+    printlnElementSymbol(107);
     srand(RAND_SEED);
     System system;
     system.n_particles = _N_PARTICLES;
@@ -78,7 +78,7 @@ int main(int argc, char const *argv[])
         // double pot = getEdwaldPotentialYukawa(&system, 1);
         // fprintf(file, "%d;%lf\n", i, pot);
         double pot = ewald_energy(&system);
-        printf("ED: %.10E\n", pot);
+        printf("ED {Range:%d}: %.10E\n", i, pot);
     }
 
     for (size_t i = 0; i < 10; i++)
@@ -87,7 +87,7 @@ int main(int argc, char const *argv[])
         double pot = getCoulombPotential(&system);
         // double pot = getYukawaPotential(&system, 1);
         fprintf(file, "%d;%lf\n", i, pot);
-        printf("C: %.10E\n", pot);
+        printf("C {Range:%d}: %.10E\n", i, pot);
     }
 
     free(system.particles);
