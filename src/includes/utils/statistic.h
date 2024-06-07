@@ -36,7 +36,13 @@ double randUnif(double min, double max)
     return min + rand() / (RAND_MAX + 1.) * (max - min);
 }
 
-// Return a random value gaussian distributed
+/**
+ * @brief Return a random double with a gaussian distribution
+ *
+ * @param mean
+ * @param sigma
+ * @return
+ */
 double randGauss(double mean, double sigma)
 {
     double x = randUnif(0, 1);

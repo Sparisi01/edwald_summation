@@ -7,7 +7,7 @@
 #include <math.h>
 #include <stdlib.h>
 
-unsigned int _K_RANGE = 0;
+int _K_RANGE = 0;
 
 double reciprocal_space_coulomb_energy(System *s, double ALPHA)
 {

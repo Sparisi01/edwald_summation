@@ -6,13 +6,13 @@
 #define SQR_3 1.73205080757  // Square root of 3
 #define SQR_PI 1.77245385091 // Square root of PI
 
-// Set seed for reproducibility
+// Random seed for reproducibility
 #define RAND_SEED 1
 
 const unsigned int _N_ELEMENTS = 118;
 
 // from https://www.qmul.ac.uk/sbcs/iupac/AtWt/index.html#02 (2019)
-double atomic_masses[118] =
+const double atomic_masses[118] =
     {1.008, 4.002, 6.94, 9.012, 10.81, 12.011, 14.007, 15.999,
      18.998, 20.1797, 22.989, 24.305, 26.981, 28.085, 30.973, 32.06,
      35.45, 39.948, 39.0983, 40.078, 44.955, 47.867, 50.9415, 51.9961,
@@ -29,7 +29,7 @@ double atomic_masses[118] =
      270., 269., 270., 270., 278., 281., 281., 285.,
      286., 289., 289., 293., 293., 294.};
 
-char elements_symbol[118][2] =
+const char elements_symbol[118][2] =
     {" H", "He", "Li", "Be", " B", " C", " N", " O", " F", "Ne", "Na", "Mg", "Al", "Si", " P", " S",
      "Cl", "Ar", " K", "Ca", "Sc", "Ti", " V", "Cr", "Mn", "Fe", "Co", "Ni", "Cu", "Zn", "Ga", "Ge",
      "As", "Se", "Br", "Kr", "Rb", "Sr", " Y", "Zr", "Nb", "Mo", "Tc", "Ru", "Rh", "Pd", "Ag", "Cd",

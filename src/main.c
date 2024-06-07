@@ -27,7 +27,7 @@ int writeParticlesPositions(Particle *particles, int n_particles, FILE *file)
 
 int main(int argc, char const *argv[])
 {
-    printElementSymbol(200);
+    printElementSymbol(107);
     srand(RAND_SEED);
     System system;
     system.n_particles = _N_PARTICLES;
@@ -38,7 +38,8 @@ int main(int argc, char const *argv[])
         perror("Error, malloc 'system.particles' returned NULL:");
         exit(EXIT_FAILURE);
     }
-    // INITIALIZATION ------------
+
+    //==>INITIALIZATION<==//
     double charge_sum = 0;
     for (size_t i = 0; i < system.n_particles; i++)
     {
@@ -61,7 +62,7 @@ int main(int argc, char const *argv[])
     // DO THINGS
     FILE *file = fopen("./data/range_variabile_3.csv", "w");
     _CUTOFF = _CELL_LENGHT / 2;
-    _ALPHA = 3.5 / _CUTOFF;
+    _ALPHA = 4.5 / _CUTOFF;
     //_ALPHA = 1e8;
     // Stima errore se particelle disposte casualmente
 
@@ -71,7 +72,7 @@ int main(int argc, char const *argv[])
     printf("Stima errore totale: %.5E\n", max_error_short * n_interazioni * volume_esterno_sfera);
     printf("Stima errore singolo: %.5E\n", max_error_short);
 
-    for (size_t i = 0; i < 10; i++)
+    for (size_t i = 0; i < 7; i++)
     {
         _K_RANGE = i;
         // double pot = getEdwaldPotentialYukawa(&system, 1);
@@ -88,4 +89,6 @@ int main(int argc, char const *argv[])
         fprintf(file, "%d;%lf\n", i, pot);
         printf("C: %.10E\n", pot);
     }
+
+    free(system.particles);
 }

@@ -19,10 +19,12 @@ double real_space_coulomb_energy(System *s, double ALPHA)
 
     // Using the fact that Uᵢⱼ = Uⱼᵢ sum over i and j with j>i and remove the 1/2 factor.
     // By doing that you cut in half the number of CPU cicles needed
-    for (size_t i = 0; i < s->n_particles - 1; i++)
+    for (size_t i = 0; i < s->n_particles; i++)
     {
-        for (size_t j = i + 1; j < s->n_particles; j++)
+        for (size_t j = 0; j < s->n_particles; j++)
         {
+            if (i == j) continue;
+
             qi = s->particles[i].charge;
             qj = s->particles[j].charge;
 
@@ -46,7 +48,7 @@ double real_space_coulomb_energy(System *s, double ALPHA)
             energy_sum += (qi * qj) * erfc(ALPHA * r_ij_mod) / r_ij_mod;
         }
     }
-    return energy_sum;
+    return energy_sum * 0.5;
 
 ALPHA_ERROR:
     printf("ERROR: ALPHA must be greater than 0");

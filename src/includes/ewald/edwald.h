@@ -5,11 +5,16 @@
 #ifndef EDWALD_H
 #define EDWALD_H
 
-double _ALPHA = 1; // ciao
+double _ALPHA = 1;
 
-void setAlphaByError(double error)
+void alpha_by_precision(double precision)
 {
-    _ALPHA = sqrt(-log(error));
+    _ALPHA = sqrt(-log(precision));
+}
+
+void real_cutoff_by_precision(double precision)
+{
+    _ALPHA = sqrt(-log(precision));
 }
 
 double self_coulomb_energy(System *system, double ALPHA)

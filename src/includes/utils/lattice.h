@@ -45,8 +45,8 @@ int restore_positions_in_lattice_first_cell(Particle *particles, int n_particles
 
 /// @brief Apply the minimum image convention.
 /// Link: https://en.wikipedia.org/wiki/Periodic_boundary_conditions
-/// @param r_ij pos_i - pos_j as Vec3 object. Note: r_ij is passed by
-/// reference and it is directly modified by the function.
+/// @param r_ij pos_i - pos_j as Vec3 object. r_ij is passed by
+/// reference and it's directly modified by the function.
 /// @param cell_length
 void minimum_image_convention(Vec3 *r_ij, double cell_length)
 {
