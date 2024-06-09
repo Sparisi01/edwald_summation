@@ -33,4 +33,11 @@ typedef struct System
     struct Vec3 *forces;
 } System;
 
+typedef struct Observables
+{
+    double temperature;
+    double energy;
+    double pressure;
+} Observables;
+
 #endif

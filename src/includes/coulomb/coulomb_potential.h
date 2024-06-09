@@ -15,7 +15,7 @@ double getCoulombPotential(System *s)
 
     for (size_t i = 0; i < s->n_particles; i++)
     {
-        for (size_t j = 0; j < s->n_particles; j++) // problema forse qui in azione e reazione caso reticolare
+        for (size_t j = 0; j < s->n_particles; j++)
         {
             for (int r_x = -_R_RANGE; r_x <= _R_RANGE; r_x++)
             {
@@ -44,7 +44,7 @@ double getCoulombPotential(System *s)
         }
     }
 
-    return 0.5*sum;
+    return 0.5 * sum;
 }
 
 double getYukawaPotential(System *s, double LAMBDA)

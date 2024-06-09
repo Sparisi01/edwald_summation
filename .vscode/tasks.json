@@ -9,7 +9,7 @@
         "-g",
         "${file}",
         "-pthread",
-        "-O0",
+        "-O3",
         "-o",
         "${fileDirname}\\build\\${fileBasenameNoExtension}.exe"
       ],

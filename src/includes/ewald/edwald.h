@@ -30,19 +30,11 @@ double self_coulomb_energy(System *system, double ALPHA)
 double ewald_energy(System *system)
 {
     double short_range = real_space_coulomb_energy(system, _ALPHA);
-    double long_range = reciprocal_space_coulomb_energy(system, _ALPHA);
+    double long_range = reciprocal_space_coulomb_energy_2(system, _ALPHA);
     double self = self_coulomb_energy(system, _ALPHA);
 
     return (short_range + long_range - self);
 }
-
-/* double getEdwaldPotentialYukawa(System *system, double LAMBDA)
-{
-    double short_range = real_space_potential_yukawa(system, _ALPHA, LAMBDA);
-    double long_range = reciprocal_space_potential_yukawa(system, _ALPHA, LAMBDA);
-
-    return (short_range + long_range) * POT_TYPE;
-} */
 
 Vec3 *getEdwaldForces(System *system)
 {
