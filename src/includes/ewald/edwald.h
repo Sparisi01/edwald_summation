@@ -1,18 +1,13 @@
+#ifndef EDWALD_H
+#define EDWALD_H
+
 #include "edwald_real_space.h"
 #include "edwald_reciprocal_space.h"
 #include <math.h>
 
-#ifndef EDWALD_H
-#define EDWALD_H
-
 double _ALPHA = 1;
 
 void alpha_by_precision(double precision)
-{
-    _ALPHA = sqrt(-log(precision));
-}
-
-void real_cutoff_by_precision(double precision)
 {
     _ALPHA = sqrt(-log(precision));
 }
@@ -30,7 +25,8 @@ double self_coulomb_energy(System *system, double ALPHA)
 double ewald_energy(System *system)
 {
     double short_range = real_space_coulomb_energy(system, _ALPHA);
-    double long_range = reciprocal_space_coulomb_energy_2(system, _ALPHA);
+    double long_range = reciprocal_space_coulomb_energy(system, _ALPHA);
+    // double long_range = reciprocal_space_coulomb_energy_2(system, _ALPHA);
     double self = self_coulomb_energy(system, _ALPHA);
 
     return (short_range + long_range - self);

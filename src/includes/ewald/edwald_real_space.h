@@ -18,11 +18,11 @@ double real_space_coulomb_energy(System *s, double ALPHA)
     double qi, qj;
 
     // Only cell (0,0,0), cutoff must be less than cell_length
-    for (size_t i = 0; i < s->n_particles; i++)
+    for (size_t i = 0; i < s->n_particles - 1; i++)
     {
         qi = s->particles[i].charge;
 
-        for (size_t j = 0; j < s->n_particles; j++)
+        for (size_t j = i + 1; j < s->n_particles; j++)
         {
             if (i == j) continue;
 
@@ -50,7 +50,7 @@ double real_space_coulomb_energy(System *s, double ALPHA)
         }
     }
 
-    return 0.5 * energy_sum;
+    return energy_sum;
 
 PARTICLE_OVERLAP_ERROR:
     printf("ERROR: particle overlap");

@@ -19,6 +19,50 @@ double reciprocal_space_coulomb_energy(System *s, double ALPHA)
 
     // All reciprocal lattice frequencies are multiple of the base frequency 2π/L
     double base_frequency = (2 * PI / s->cell_lenght);
+    double qi, qj;
+
+    double sum = 0;
+    for (int k_x = -_K_RANGE; k_x <= _K_RANGE; k_x++)
+    {
+        for (int k_y = -_K_RANGE; k_y <= _K_RANGE; k_y++)
+        {
+            for (int k_z = -_K_RANGE; k_z <= _K_RANGE; k_z++)
+            {
+                if (k_x == 0 && k_y == 0 && k_z == 0) continue;
+                for (size_t i = 0; i < s->n_particles; i++)
+                {
+                    qi = s->particles[i].charge;
+                    for (size_t j = 0; j < s->n_particles; j++)
+                    {
+                        qj = s->particles[j].charge;
+
+                        Vec3 r_ij = {
+                            .x = s->particles[i].x - s->particles[j].x,
+                            .y = s->particles[i].y - s->particles[j].y,
+                            .z = s->particles[i].z - s->particles[j].z,
+                        };
+                        double k_mod2 = (k_x * k_x + k_y * k_y + k_z * k_z) * (base_frequency * base_frequency);
+                        double dot_prod = (k_x * r_ij.x + k_y * r_ij.y + k_z * r_ij.z) * base_frequency;
+                        sum += (qi * qj) * cexp(I * dot_prod) * exp(-k_mod2 / (4 * ALPHA * ALPHA)) / k_mod2;
+                    }
+                }
+            }
+        }
+    }
+    double volume = pow(s->cell_lenght, 3);
+    return 0.5 * (4 * PI) / volume * sum;
+}
+
+double reciprocal_space_coulomb_energy_2(System *s, double ALPHA)
+{
+    if (ALPHA <= 0)
+    {
+        printf("ERROR: ALPHA must be greater than 0");
+        exit(EXIT_FAILURE);
+    }
+
+    // All reciprocal lattice frequencies are multiple of the base frequency 2π/L
+    double base_frequency = (2 * PI / s->cell_lenght);
 
     //____________________________________________
     // COMPUTE STRUCTURAL FACTOR FOR ALL K-VECTORS
@@ -86,7 +130,7 @@ double reciprocal_space_coulomb_energy(System *s, double ALPHA)
 
                 double k_mod2 = (k_x * k_x + k_y * k_y + k_z * k_z) * (base_frequency * base_frequency);
                 double str_quad = (structure_factor[k_x + _K_RANGE][k_y + _K_RANGE][k_z + _K_RANGE] * conj(structure_factor[k_x + _K_RANGE][k_y + _K_RANGE][k_z + _K_RANGE])); // |S(k)|²
-                potential_sum += exp(-(k_mod2) / (4 * ALPHA * ALPHA)) / k_mod2 * str_quad;
+                potential_sum += exp(-k_mod2 / (4 * ALPHA * ALPHA)) / k_mod2 * str_quad;
             }
         }
     }
@@ -97,50 +141,6 @@ double reciprocal_space_coulomb_energy(System *s, double ALPHA)
 ALPHA_ERROR:
     printf("ALPHA must be greater than 0\n");
     exit(EXIT_FAILURE);
-}
-
-double reciprocal_space_coulomb_energy_2(System *s, double ALPHA)
-{
-    if (ALPHA <= 0)
-    {
-        printf("ERROR: ALPHA must be greater than 0");
-        exit(EXIT_FAILURE);
-    }
-
-    // All reciprocal lattice frequencies are multiple of the base frequency 2π/L
-    double base_frequency = (2 * PI / s->cell_lenght);
-    double qi, qj;
-
-    double sum = 0;
-    for (int k_x = -_K_RANGE; k_x <= _K_RANGE; k_x++)
-    {
-        for (int k_y = -_K_RANGE; k_y <= _K_RANGE; k_y++)
-        {
-            for (int k_z = -_K_RANGE; k_z <= _K_RANGE; k_z++)
-            {
-                if (k_x == 0 && k_y == 0 && k_z == 0) continue;
-                for (size_t i = 0; i < s->n_particles; i++)
-                {
-                    qi = s->particles[i].charge;
-                    for (size_t j = 0; j < s->n_particles; j++)
-                    {
-                        qj = s->particles[j].charge;
-
-                        Vec3 r_ij = {
-                            .x = s->particles[i].x - s->particles[j].x,
-                            .y = s->particles[i].y - s->particles[j].y,
-                            .z = s->particles[i].z - s->particles[j].z,
-                        };
-                        double k_mod2 = (k_x * k_x + k_y * k_y + k_z * k_z) * (base_frequency * base_frequency);
-                        double dot_prod = (k_x * r_ij.x + k_y * r_ij.y + k_z * r_ij.z) * base_frequency;
-                        sum += (qi * qj) * cexp(I * dot_prod) * exp(-k_mod2 / (4 * ALPHA * ALPHA)) / k_mod2;
-                    }
-                }
-            }
-        }
-    }
-    double volume = pow(s->cell_lenght, 3);
-    return 0.5 * (4 * PI) / volume * sum;
 }
 
 Vec3 *reciprocal_space_force()

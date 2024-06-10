@@ -8,7 +8,7 @@
 #include "includes/ewald/edwald.h"
 #include "includes/utils/statistic.h"
 
-int _N_PARTICLES = 30;
+int _N_PARTICLES = 20;
 double _DENSITY = 0.01;
 double _CELL_LENGHT = 1;
 double _SIGMA_VELOCITIES = 1.;
@@ -62,18 +62,12 @@ int main(int argc, char const *argv[])
     writeParticlesPositions(system.particles, system.n_particles, file_start_position);
     // DO THINGS
 
-    int MAX_RANGE = 15;
+    int MAX_RANGE = 30;
     _CUTOFF = _CELL_LENGHT / 2;
-
-    /* // Stima errore se particelle disposte casualmente
-    double max_error_short = erfc(_ALPHA * _CUTOFF) / _CUTOFF;
-    double volume_esterno_sfera = pow(_CELL_LENGHT, 3) - 4. / 3. * PI * pow(_CELL_LENGHT / 2., 3);
-    double n_interazioni = system.n_particles * (system.n_particles - 1) / 2.;
-    printf("Stima errore totale: %.5E\n", max_error_short * n_interazioni * volume_esterno_sfera);
-    printf("Stima errore singolo: %.5E\n", max_error_short); */
 
     //===== EDWALD 3.5 =====//
     FILE *file_convergenza_edw_3_5 = fopen("./data/range_variabile_edw_3_5.csv", "w");
+    if (!file_convergenza_edw_3_5) exit(EXIT_FAILURE);
     _ALPHA = 3.5 / _CUTOFF;
     double last_pot = 0;
     for (size_t i = 0; i < MAX_RANGE; i++)
@@ -114,7 +108,7 @@ int main(int argc, char const *argv[])
         last_pot = pot;
     }
 
-    //===== EDWALD 9 =====//
+    //===== EDWALD 2 =====//
     FILE *file_convergenza_edw_2 = fopen("./data/range_variabile_edw_2.csv", "w");
     _ALPHA = 2 / _CUTOFF;
     last_pot = 0;
@@ -131,7 +125,7 @@ int main(int argc, char const *argv[])
     //===== COULOMB =====//
     FILE *file_convergenza_coulomb = fopen("./data/range_variabile_coulomb.csv", "w");
     last_pot = 0;
-    for (size_t i = 0; i < 50; i++)
+    for (size_t i = 0; i < MAX_RANGE; i++)
     {
         _R_RANGE = i;
         double pot = getCoulombPotential(&system);
