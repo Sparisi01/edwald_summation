@@ -8,7 +8,7 @@
 #include "includes/ewald/edwald.h"
 #include "includes/utils/statistic.h"
 
-int _N_PARTICLES = 10;
+int _N_PARTICLES = 100;
 double _DENSITY = 0.01;
 double _CELL_LENGHT = 1;
 double _SIGMA_VELOCITIES = 1.;
@@ -62,11 +62,11 @@ int main(int argc, char const *argv[])
     printf("Total charge: %lf\n", charge_sum);
 
     _CUTOFF = _CELL_LENGHT;
-    _K_RANGE = 10;
+    _K_RANGE = 30;
 
-    double ALPHA_MAX = 10;
+    double ALPHA_MAX = 15;
     double ALPHA_MIN = 0.5;
-    int N_ALPHA = 19;
+    int N_ALPHA = 29;
 
     FILE *file_comparison_real_rec = fopen("../src/data/comparison_real_rec.csv", "w");
 

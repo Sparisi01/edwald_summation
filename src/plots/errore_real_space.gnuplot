@@ -6,19 +6,19 @@ set title font ',36'
 set monochrome
 set key spacing 2 reverse Left
 
-set xrange [0:8]
+set xrange [0:7]
 
 
 set logscale y
 
 set format y "10^{%T}"
 
-set title "Contribute of Real-Reciprocal-Self energy"
-set ylabel 'Energy per particle' font ',36'
+set title "Real space relative-error"
+set ylabel 'Relative error' font ',36'
 set xlabel 'αL' font ',36'
 set grid
-a = -1.9583601949E+00
-f(x) = exp(-(x*x))/10
+a = -1.2766682221E+00
+f(x) = exp(-(x*x))/100
 plot '../data/comparison_real_rec.csv' using 1:(abs(($5 - a)/a)) w lp pt 4 ps 2.5 t "Real"
 
 

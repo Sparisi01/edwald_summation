@@ -8,7 +8,7 @@
 #include "includes/ewald/edwald.h"
 #include "includes/utils/statistic.h"
 
-int _N_PARTICLES = 100;
+int _N_PARTICLES = 200;
 double _DENSITY = 0.01;
 double _CELL_LENGHT = 1;
 double _SIGMA_VELOCITIES = 1.;
@@ -68,10 +68,10 @@ int main(int argc, char const *argv[])
     writeParticlesPositions(system.particles, system.n_particles, file_start_position);
 
     double last_pot;
-    int MAX_RANGE = 15;
+    int MAX_RANGE = 25;
     _CUTOFF = _CELL_LENGHT;
 
-    alpha_file config[6] = {
+    alpha_file config[7] = {
         {
             .alpha = 1,
             .file = "./data/convergenza_range/range_variabile_edw_1.csv",
@@ -101,9 +101,13 @@ int main(int argc, char const *argv[])
             .alpha = 9,
             .file = "./data/convergenza_range/range_variabile_edw_9.csv",
         },
+        {
+            .alpha = 15,
+            .file = "./data/convergenza_range/range_variabile_edw_15.csv",
+        },
     };
 
-    for (size_t i = 0; i < 6; i++)
+    for (size_t i = 0; i < 7; i++)
     {
         FILE *file_convergenza_edw = fopen(config[i].file, "w");
         if (!file_convergenza_edw) exit(EXIT_FAILURE);
@@ -126,7 +130,7 @@ int main(int argc, char const *argv[])
     }
 
     //===== COULOMB =====//
-    FILE *file_convergenza_coulomb = fopen("./data/convergenza_range/range_variabile_coulomb.csv", "w");
+    /* FILE *file_convergenza_coulomb = fopen("./data/convergenza_range/range_variabile_coulomb.csv", "w");
     last_pot = 0;
     printf("---------------------\n");
     for (size_t i = 0; i < MAX_RANGE; i++)
@@ -140,5 +144,5 @@ int main(int argc, char const *argv[])
         if (rel_error == 0) break;
         last_pot = pot;
     }
-    free(system.particles);
+    free(system.particles); */
 }
