@@ -7,9 +7,9 @@
 
 double _ALPHA = 1;
 
-void alpha_by_precision(double precision)
+double alpha_by_precision(double precision)
 {
-    _ALPHA = sqrt(-log(precision));
+    return sqrt(-log(precision));
 }
 
 double self_coulomb_energy(System *system, double ALPHA)
@@ -26,7 +26,6 @@ double ewald_energy(System *system)
 {
     double short_range = real_space_coulomb_energy(system, _ALPHA);
     double long_range = reciprocal_space_coulomb_energy(system, _ALPHA);
-    // double long_range = reciprocal_space_coulomb_energy_2(system, _ALPHA);
     double self = self_coulomb_energy(system, _ALPHA);
 
     return (short_range + long_range - self);
@@ -34,6 +33,7 @@ double ewald_energy(System *system)
 
 Vec3 *getEdwaldForces(System *system)
 {
+    return NULL;
 }
 
 #endif

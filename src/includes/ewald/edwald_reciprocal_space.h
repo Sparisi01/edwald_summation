@@ -28,7 +28,55 @@ double reciprocal_space_coulomb_energy(System *s, double ALPHA)
         {
             for (int k_z = -_K_RANGE; k_z <= _K_RANGE; k_z++)
             {
+                // Ignore cell (0,0,0) in k-space
                 if (k_x == 0 && k_y == 0 && k_z == 0) continue;
+
+                double complex factor = 0;
+                for (size_t i = 0; i < s->n_particles; i++)
+                {
+                    qi = s->particles[i].charge;
+
+                    Vec3 r_i = {
+                        .x = s->particles[i].x,
+                        .y = s->particles[i].y,
+                        .z = s->particles[i].z,
+                    };
+                    double dot_prod = (k_x * r_i.x + k_y * r_i.y + k_z * r_i.z) * base_frequency;
+                    factor += qi * cexp(I * dot_prod);
+                }
+
+                double k_mod2 = (k_x * k_x + k_y * k_y + k_z * k_z) * (base_frequency * base_frequency);
+
+                sum += pow(cabs(factor), 2) * exp(-k_mod2 / (4 * ALPHA * ALPHA)) / k_mod2;
+            }
+        }
+    }
+    double volume = pow(s->cell_lenght, 3);
+    return 0.5 * (4 * PI) / volume * sum;
+}
+
+/* double reciprocal_space_coulomb_energy(System *s, double ALPHA)
+{
+    if (ALPHA <= 0)
+    {
+        printf("ERROR: ALPHA must be greater than 0");
+        exit(EXIT_FAILURE);
+    }
+
+    // All reciprocal lattice frequencies are multiple of the base frequency 2π/L
+    double base_frequency = (2 * PI / s->cell_lenght);
+    double qi, qj;
+
+    double sum = 0;
+    for (int k_x = -_K_RANGE; k_x <= _K_RANGE; k_x++)
+    {
+        for (int k_y = -_K_RANGE; k_y <= _K_RANGE; k_y++)
+        {
+            for (int k_z = -_K_RANGE; k_z <= _K_RANGE; k_z++)
+            {
+                // Ignore cell (0,0,0) in k-space
+                if (k_x == 0 && k_y == 0 && k_z == 0) continue;
+
                 for (size_t i = 0; i < s->n_particles; i++)
                 {
                     qi = s->particles[i].charge;
@@ -51,9 +99,9 @@ double reciprocal_space_coulomb_energy(System *s, double ALPHA)
     }
     double volume = pow(s->cell_lenght, 3);
     return 0.5 * (4 * PI) / volume * sum;
-}
+} */
 
-double reciprocal_space_coulomb_energy_2(System *s, double ALPHA)
+/* double reciprocal_space_coulomb_energy_2(System *s, double ALPHA)
 {
     if (ALPHA <= 0)
     {
@@ -141,7 +189,7 @@ double reciprocal_space_coulomb_energy_2(System *s, double ALPHA)
 ALPHA_ERROR:
     printf("ALPHA must be greater than 0\n");
     exit(EXIT_FAILURE);
-}
+} */
 
 Vec3 *reciprocal_space_force()
 {

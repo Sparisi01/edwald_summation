@@ -27,6 +27,9 @@ int writeParticlesPositions(Particle *particles, int n_particles, FILE *file)
 
 int main(int argc, char const *argv[])
 {
+
+    printf("%lf\n", alpha_by_precision(1e-3));
+
     printlnElementSymbol(107);
     srand(RAND_SEED);
     System system;
@@ -59,21 +62,22 @@ int main(int argc, char const *argv[])
     printf("Total charge: %lf\n", charge_sum);
 
     _CUTOFF = _CELL_LENGHT;
-    _K_RANGE = 15;
+    _K_RANGE = 10;
 
     double ALPHA_MAX = 10;
-    double ALPHA_MIN = 0.1;
-    int N_ALPHA = 20;
+    double ALPHA_MIN = 0.5;
+    int N_ALPHA = 19;
 
-    FILE *file_comparison_real_rec = fopen("../src/data/comparison_real_rec2.csv", "w");
+    FILE *file_comparison_real_rec = fopen("../src/data/comparison_real_rec.csv", "w");
+
     for (size_t i = 0; i < N_ALPHA; i++)
     {
         double tmp_alpha = ALPHA_MIN + (ALPHA_MAX - ALPHA_MIN) / ((double)N_ALPHA) * i;
-        double real = real_space_coulomb_energy(&system, tmp_alpha);
-        double rec = reciprocal_space_coulomb_energy(&system, tmp_alpha);
-        double self = self_coulomb_energy(&system, tmp_alpha);
+        double real = real_space_coulomb_energy(&system, tmp_alpha) / _N_PARTICLES;
+        double rec = reciprocal_space_coulomb_energy(&system, tmp_alpha) / _N_PARTICLES;
+        double self = self_coulomb_energy(&system, tmp_alpha) / _N_PARTICLES;
 
         printf("%.5E;%.5E;%.5E;%.5E\n", tmp_alpha, real, rec, self);
-        fprintf(file_comparison_real_rec, "%.5E;%.5E;%.5E;%.5E\n", tmp_alpha, real, rec, self);
+        fprintf(file_comparison_real_rec, "%.10E;%.10E;%.10E;%.10E;%.10E\n", tmp_alpha, real, rec, self, real + rec - self);
     }
 }
