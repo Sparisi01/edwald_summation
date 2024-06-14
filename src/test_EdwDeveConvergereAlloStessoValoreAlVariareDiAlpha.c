@@ -8,10 +8,11 @@
 #include "includes/ewald/edwald.h"
 #include "includes/utils/statistic.h"
 
-int _N_PARTICLES = 200;
+int _N_PARTICLES = 10;
 double _DENSITY = 0.01;
 double _CELL_LENGHT = 1;
 double _SIGMA_VELOCITIES = 1.;
+int _MAX_RANGE = 100;
 
 typedef struct alpha_file
 {
@@ -68,17 +69,17 @@ int main(int argc, char const *argv[])
     writeParticlesPositions(system.particles, system.n_particles, file_start_position);
 
     double last_pot;
-    int MAX_RANGE = 25;
-    _CUTOFF = _CELL_LENGHT;
+
+    _CUTOFF = _CELL_LENGHT / 2;
 
     alpha_file config[7] = {
         {
-            .alpha = 1,
+            .alpha = 1.,
             .file = "./data/convergenza_range/range_variabile_edw_1.csv",
 
         },
         {
-            .alpha = 2,
+            .alpha = 2.,
             .file = "./data/convergenza_range/range_variabile_edw_2.csv",
 
         },
@@ -88,21 +89,21 @@ int main(int argc, char const *argv[])
 
         },
         {
-            .alpha = 5,
+            .alpha = 5.,
             .file = "./data/convergenza_range/range_variabile_edw_5.csv",
 
         },
         {
-            .alpha = 7,
+            .alpha = 7.,
             .file = "./data/convergenza_range/range_variabile_edw_7.csv",
 
         },
         {
-            .alpha = 9,
+            .alpha = 9.,
             .file = "./data/convergenza_range/range_variabile_edw_9.csv",
         },
         {
-            .alpha = 15,
+            .alpha = 15.,
             .file = "./data/convergenza_range/range_variabile_edw_15.csv",
         },
     };
@@ -111,38 +112,38 @@ int main(int argc, char const *argv[])
     {
         FILE *file_convergenza_edw = fopen(config[i].file, "w");
         if (!file_convergenza_edw) exit(EXIT_FAILURE);
-        _ALPHA = config[i].alpha;
+        _ALPHA = config[i].alpha / _CUTOFF;
         last_pot = 0;
         printf("---------------------\n");
         printf("ALPHA: %lf\n", _ALPHA);
-        for (size_t i = 0; i < MAX_RANGE; i++)
+        for (size_t j = 0; j < _MAX_RANGE; j++)
         {
-            _K_RANGE = i;
+            _K_RANGE = j;
             double pot = ewald_energy(&system);
             double rel_error = fabs((last_pot - pot) / pot);
 
-            fprintf(file_convergenza_edw, "%d;%.5E;%.5E\n", i, pot, rel_error);
+            fprintf(file_convergenza_edw, "%d;%.15E;%.15E\n", j, pot, rel_error);
 
-            printf("{ED, Range:%d, RelErr:%.3E}: %.10E\n", i, rel_error, pot);
+            printf("{ED, Range:%d, RelErr:%.3E}: %.10E\n", j, rel_error, pot);
             if (rel_error == 0) break;
             last_pot = pot;
         }
     }
 
     //===== COULOMB =====//
-    /* FILE *file_convergenza_coulomb = fopen("./data/convergenza_range/range_variabile_coulomb.csv", "w");
+    FILE *file_convergenza_coulomb = fopen("./data/convergenza_range/range_variabile_coulomb.csv", "w");
     last_pot = 0;
     printf("---------------------\n");
-    for (size_t i = 0; i < MAX_RANGE; i++)
+    for (size_t i = 0; i < _MAX_RANGE; i++)
     {
         _R_RANGE = i;
         double pot = getCoulombPotential(&system);
         double rel_error = fabs((last_pot - pot) / pot);
-        fprintf(file_convergenza_coulomb, "%d;%.5E;%.5E\n", i, pot, rel_error);
+        fprintf(file_convergenza_coulomb, "%d;%.15E;%.15E\n", i, pot, rel_error);
 
         printf("{C, Range:%d, RelErr:%.3E}: %.10E\n", i, rel_error, pot);
         if (rel_error == 0) break;
         last_pot = pot;
     }
-    free(system.particles); */
+    free(system.particles);
 }

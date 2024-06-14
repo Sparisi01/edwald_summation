@@ -1,0 +1,556 @@
+
+
+*******************************************************************************
+Thu Jun 13 11:10:49 2024
+
+
+FIT:    data read from "../data/convergenza_range/range_variabile_coulomb.csv" using 1:3
+        format = x:z
+        x range restricted to [3.00000 : 49.0000]
+        #datapoints = 47
+        residuals are weighted equally (unit weight)
+
+function used for fitting: f(x)
+	f(x) = a*x**b
+fitted parameters initialized with current variable values
+
+iter      chisq       delta/lim  lambda   a             b            
+   0 3.7444595915e-01   0.00e+00  1.36e-01    1.000000e+00  -1.000000e+00
+  14 6.0452400330e-13  -8.77e-05  1.36e-05    7.830328e-03  -3.061962e+00
+
+After 14 iterations the fit converged.
+final sum of squares of residuals : 6.04524e-13
+rel. change during last iteration : -8.76745e-10
+
+degrees of freedom    (FIT_NDF)                        : 45
+rms of residuals      (FIT_STDFIT) = sqrt(WSSR/ndf)    : 1.15905e-07
+variance of residuals (reduced chisquare) = WSSR/ndf   : 1.34339e-14
+
+Final set of parameters            Asymptotic Standard Error
+=======================            ==========================
+a               = 0.00783033       +/- 2.086e-05    (0.2664%)
+b               = -3.06196         +/- 0.002252     (0.07353%)
+
+correlation matrix of the fit parameters:
+                a      b      
+a               1.000 
+b              -0.990  1.000 
+
+
+*******************************************************************************
+Thu Jun 13 11:18:32 2024
+
+
+FIT:    data read from "../data/convergenza_range/range_variabile_coulomb.csv" using 1:3
+        format = x:z
+        x range restricted to [3.00000 : 49.0000]
+        #datapoints = 47
+        residuals are weighted equally (unit weight)
+
+function used for fitting: g(x)
+	g(x) = (f(x) - f(x+1))/(c - f(x))
+	f(x) = a*x**b
+fitted parameters initialized with current variable values
+
+iter      chisq       delta/lim  lambda   a             b             c            
+   0 2.9530153564e-04   0.00e+00  4.87e-03    7.830328e-03  -3.061962e+00   1.000000e-02
+   6 9.1069164187e-08   0.00e+00  4.87e-09    5.914070e-02  -5.914437e+01   1.667615e-02
+
+After 6 iterations the fit converged.
+final sum of squares of residuals : 9.10692e-08
+rel. change during last iteration : 0
+
+degrees of freedom    (FIT_NDF)                        : 44
+rms of residuals      (FIT_STDFIT) = sqrt(WSSR/ndf)    : 4.54945e-05
+variance of residuals (reduced chisquare) = WSSR/ndf   : 2.06975e-09
+
+Final set of parameters            Asymptotic Standard Error
+=======================            ==========================
+a               = 0.0591407        +/- 7.203e+48    (1.218e+52%)
+b               = -59.1444         +/- 1.406e+38    (2.376e+38%)
+c               = 0.0166761        +/- 2.033e+48    (1.219e+52%)
+
+correlation matrix of the fit parameters:
+                a      b      c      
+a               1.000 
+b               1.000  1.000 
+c               1.000  1.000  1.000 
+
+
+*******************************************************************************
+Thu Jun 13 11:19:00 2024
+
+
+FIT:    data read from "../data/convergenza_range/range_variabile_coulomb.csv" using 1:3
+        format = x:z
+        x range restricted to [3.00000 : 49.0000]
+        #datapoints = 47
+        residuals are weighted equally (unit weight)
+
+function used for fitting: g(x)
+	g(x) = (f(x) - f(x+1))/(c - f(x))
+	f(x) = a*x**b
+fitted parameters initialized with current variable values
+
+iter      chisq       delta/lim  lambda   a             b             c            
+   0 9.1069164187e-08   0.00e+00  1.89e-29    5.914070e-02  -5.914437e+01   1.000000e+00
+
+Current data point
+=========================
+#               = 1 out of 47
+x               = 1.12563e+21    
+z               = 0.00027108     
+
+Current set of parameters
+=========================
+a               = 1.12563e+21    
+b               = 7.08187e+25    
+c               = -1.90141e+22   
+
+BREAK: Function evaluation yields NaN ("not a number")
+
+*******************************************************************************
+Thu Jun 13 11:23:08 2024
+
+
+FIT:    data read from "../data/convergenza_range/range_variabile_coulomb.csv" using 1:2
+        format = x:z
+        x range restricted to [3.00000 : 49.0000]
+        #datapoints = 47
+        residuals are weighted equally (unit weight)
+
+function used for fitting: h(x)
+	h(x) = d + a*x**b
+fitted parameters initialized with current variable values
+
+iter      chisq       delta/lim  lambda   a             b             c            
+   0 4.7480281070e+41   0.00e+00  1.25e+20    1.125630e+21  -1.000000e+00  -1.901408e+22
+BREAK: Singular matrix in Invert_RtR
+
+*******************************************************************************
+Thu Jun 13 11:23:20 2024
+
+
+FIT:    data read from "../data/convergenza_range/range_variabile_coulomb.csv" using 1:(abs($2))
+        format = x:z
+        x range restricted to [3.00000 : 49.0000]
+        #datapoints = 47
+        residuals are weighted equally (unit weight)
+
+function used for fitting: h(x)
+	h(x) = d + a*x**b
+fitted parameters initialized with current variable values
+
+iter      chisq       delta/lim  lambda   a             b             c            
+   0 2.9947883880e+04   0.00e+00  3.15e+01   -3.242577e+02  -1.092975e+00  -1.903309e+22
+BREAK: Singular matrix in Invert_RtR
+
+*******************************************************************************
+Thu Jun 13 11:23:48 2024
+
+
+FIT:    data read from "../data/convergenza_range/range_variabile_coulomb.csv" using 1:(abs($2))
+        format = x:z
+        x range restricted to [3.00000 : 49.0000]
+        #datapoints = 47
+        residuals are weighted equally (unit weight)
+
+function used for fitting: h(x)
+	h(x) = d + a*x**b
+fitted parameters initialized with current variable values
+
+iter      chisq       delta/lim  lambda   a             b             c            
+   0 3.1455521057e+01   0.00e+00  1.11e-01    1.000000e+00  -1.000000e+00  -1.905212e+22
+BREAK: Singular matrix in Invert_RtR
+
+*******************************************************************************
+Thu Jun 13 11:23:52 2024
+
+
+FIT:    data read from "../data/convergenza_range/range_variabile_coulomb.csv" using 1:(abs($2))
+        format = x:z
+        x range restricted to [3.00000 : 49.0000]
+        #datapoints = 47
+        residuals are weighted equally (unit weight)
+
+function used for fitting: h(x)
+	h(x) = d + a*x**b
+fitted parameters initialized with current variable values
+
+iter      chisq       delta/lim  lambda   a             b             d            
+   0 1.4648893483e-05   0.00e+00  1.04e+01    8.757202e-01   1.214752e-03   1.800000e+01
+   1 1.4648893483e-05  -2.80e-09  1.04e+00    8.757202e-01   1.214752e-03   1.800000e+01
+
+After 1 iterations the fit converged.
+final sum of squares of residuals : 1.46489e-05
+rel. change during last iteration : -2.7986e-14
+
+degrees of freedom    (FIT_NDF)                        : 44
+rms of residuals      (FIT_STDFIT) = sqrt(WSSR/ndf)    : 0.000577
+variance of residuals (reduced chisquare) = WSSR/ndf   : 3.32929e-07
+
+Final set of parameters            Asymptotic Standard Error
+=======================            ==========================
+a               = 0.87572          +/- 207.6        (2.37e+04%)
+b               = 0.00121475       +/- 0.287        (2.362e+04%)
+d               = 18               +/- 207.6        (1153%)
+
+correlation matrix of the fit parameters:
+                a      b      d      
+a               1.000 
+b              -1.000  1.000 
+d              -1.000  1.000  1.000 
+
+
+*******************************************************************************
+Thu Jun 13 11:26:12 2024
+
+
+FIT:    data read from "../data/convergenza_range/range_variabile_coulomb.csv" using 1:2
+        format = x:z
+        x range restricted to [3.00000 : 49.0000]
+        #datapoints = 47
+        residuals are weighted equally (unit weight)
+
+function used for fitting: h(x)
+	h(x) = d + a*x**b
+fitted parameters initialized with current variable values
+
+iter      chisq       delta/lim  lambda   a             b             d            
+   0 1.4622495476e-04   0.00e+00  1.09e+01    1.000000e+00  -4.000000e+00  -1.887800e+01
+  62 3.6878823515e-08  -8.06e-04  1.09e-07    3.669963e-02  -1.751677e+00  -1.887944e+01
+
+After 62 iterations the fit converged.
+final sum of squares of residuals : 3.68788e-08
+rel. change during last iteration : -8.05501e-09
+
+degrees of freedom    (FIT_NDF)                        : 44
+rms of residuals      (FIT_STDFIT) = sqrt(WSSR/ndf)    : 2.89509e-05
+variance of residuals (reduced chisquare) = WSSR/ndf   : 8.38155e-10
+
+Final set of parameters            Asymptotic Standard Error
+=======================            ==========================
+a               = 0.0366996        +/- 0.0007097    (1.934%)
+b               = -1.75168         +/- 0.0155       (0.8847%)
+d               = -18.8794         +/- 6.823e-06    (3.614e-05%)
+
+correlation matrix of the fit parameters:
+                a      b      d      
+a               1.000 
+b              -0.973  1.000 
+d               0.633 -0.724  1.000 
+
+
+*******************************************************************************
+Thu Jun 13 11:32:34 2024
+
+
+FIT:    data read from "../data/convergenza_range/range_variabile_coulomb.csv" using 1:2
+        format = x:z
+        x range restricted to [3.00000 : 12.0000]
+        #datapoints = 10
+        residuals are weighted equally (unit weight)
+
+function used for fitting: h(x)
+	h(x) = d + a*x**b
+fitted parameters initialized with current variable values
+
+iter      chisq       delta/lim  lambda   a             b             d            
+   0 8.7763317740e-09   0.00e+00  1.09e+01    3.669963e-02  -1.751677e+00  -1.887944e+01
+   8 6.6657693589e-09  -1.29e-03  1.09e-07    3.513626e-02  -1.703215e+00  -1.887951e+01
+
+After 8 iterations the fit converged.
+final sum of squares of residuals : 6.66577e-09
+rel. change during last iteration : -1.29451e-08
+
+degrees of freedom    (FIT_NDF)                        : 7
+rms of residuals      (FIT_STDFIT) = sqrt(WSSR/ndf)    : 3.08586e-05
+variance of residuals (reduced chisquare) = WSSR/ndf   : 9.52253e-10
+
+Final set of parameters            Asymptotic Standard Error
+=======================            ==========================
+a               = 0.0351363        +/- 0.001314     (3.741%)
+b               = -1.70321         +/- 0.03802      (2.232%)
+d               = -18.8795         +/- 4.384e-05    (0.0002322%)
+
+correlation matrix of the fit parameters:
+                a      b      d      
+a               1.000 
+b              -0.984  1.000 
+d               0.876 -0.938  1.000 
+
+
+*******************************************************************************
+Thu Jun 13 18:23:08 2024
+
+
+FIT:    data read from "../data/convergenza_range/range_variabile_coulomb.csv" using 1:2
+        format = x:z
+        #datapoints = 50
+        residuals are weighted equally (unit weight)
+
+function used for fitting: h(x)
+	h(x) = d + a*x**b
+fitted parameters initialized with current variable values
+
+
+Current data point
+=========================
+#               = 1 out of 50
+x               = 1              
+z               = -18.2146       
+
+Current set of parameters
+=========================
+a               = 1              
+b               = -4             
+d               = -18.8          
+
+BREAK: Undefined value during function evaluation
+
+*******************************************************************************
+Thu Jun 13 18:25:14 2024
+
+
+FIT:    data read from "../data/convergenza_range/range_variabile_coulomb.csv" using 1:2
+        format = x:z
+        #datapoints = 50
+        residuals are weighted equally (unit weight)
+
+function used for fitting: h(x)
+	h(x) = d + a*x**b
+fitted parameters initialized with current variable values
+
+
+Current data point
+=========================
+#               = 1 out of 50
+x               = 0.01           
+z               = -18.2146       
+
+Current set of parameters
+=========================
+a               = 0.01           
+b               = -4             
+d               = -18.87         
+
+BREAK: Undefined value during function evaluation
+
+*******************************************************************************
+Thu Jun 13 18:25:43 2024
+
+
+FIT:    data read from "../data/convergenza_range/range_variabile_coulomb.csv" using 1:3
+        format = x:z
+        #datapoints = 50
+        residuals are weighted equally (unit weight)
+
+function used for fitting: h(x)
+	h(x) = d + a*x**b
+fitted parameters initialized with current variable values
+
+
+Current data point
+=========================
+#               = 1 out of 50
+x               = 0.01           
+z               = 1              
+
+Current set of parameters
+=========================
+a               = 0.01           
+b               = -4             
+d               = -18.87         
+
+BREAK: Undefined value during function evaluation
+
+*******************************************************************************
+Thu Jun 13 18:25:48 2024
+
+
+FIT:    data read from "../data/convergenza_range/range_variabile_coulomb.csv" using 1:2
+        format = x:z
+        #datapoints = 50
+        residuals are weighted equally (unit weight)
+
+function used for fitting: h(x)
+	h(x) = d + a*x**b
+fitted parameters initialized with current variable values
+
+
+Current data point
+=========================
+#               = 1 out of 50
+x               = 0.01           
+z               = -18.2146       
+
+Current set of parameters
+=========================
+a               = 0.01           
+b               = -4             
+d               = -18.87         
+
+BREAK: Undefined value during function evaluation
+
+*******************************************************************************
+Thu Jun 13 18:26:20 2024
+
+
+FIT:    data read from "../data/convergenza_range/range_variabile_coulomb.csv" using 1:2
+        format = x:z
+        x range restricted to [7.51375 : 7.51804]
+BREAK: No data to fit
+
+*******************************************************************************
+Thu Jun 13 18:26:38 2024
+
+
+FIT:    data read from "../data/convergenza_range/range_variabile_coulomb.csv" using 1:2
+        format = x:z
+        #datapoints = 50
+        residuals are weighted equally (unit weight)
+
+function used for fitting: h(x)
+	h(x) = d + a*x**b
+fitted parameters initialized with current variable values
+
+
+Current data point
+=========================
+#               = 1 out of 50
+x               = 0.01           
+z               = -18.2146       
+
+Current set of parameters
+=========================
+a               = 0.01           
+b               = -4             
+d               = -18.87         
+
+BREAK: Undefined value during function evaluation
+
+*******************************************************************************
+Thu Jun 13 18:28:13 2024
+
+
+FIT:    data read from "../data/convergenza_range/range_variabile_coulomb.csv" using 1:2
+        format = x:z
+        x range restricted to [0.00000 : 50.0000]
+        #datapoints = 50
+        residuals are weighted equally (unit weight)
+
+function used for fitting: h(x)
+	h(x) = d + a*x**b
+fitted parameters initialized with current variable values
+
+
+Current data point
+=========================
+#               = 1 out of 50
+x               = 0.01           
+z               = -18.2146       
+
+Current set of parameters
+=========================
+a               = 0.01           
+b               = -2             
+d               = -18.8794       
+
+BREAK: Undefined value during function evaluation
+
+*******************************************************************************
+Thu Jun 13 18:51:52 2024
+
+
+FIT:    data read from "../data/convergenza_range/range_variabile_coulomb.csv" using 1:2
+        format = x:z
+BREAK: No data to fit
+
+*******************************************************************************
+Thu Jun 13 18:52:54 2024
+
+
+FIT:    data read from "../data/convergenza_range/range_variabile_coulomb.csv" using 1:2
+        format = x:z
+        #datapoints = 100
+        residuals are weighted equally (unit weight)
+
+function used for fitting: h(x)
+fitted parameters initialized with current variable values
+
+
+
+*******************************************************************************
+Thu Jun 13 18:53:19 2024
+
+
+FIT:    data read from "../data/convergenza_range/range_variabile_coulomb.csv" using 1:2
+        format = x:z
+        #datapoints = 100
+        residuals are weighted equally (unit weight)
+
+function used for fitting: h(x)
+	h(x) = a+b*x**c
+fitted parameters initialized with current variable values
+
+iter      chisq       delta/lim  lambda   a             b             d            
+   0 3.3713210929e+05   0.00e+00  3.47e+01   -1.800000e+01   1.000000e+00   1.000000e+00
+BREAK: Singular matrix in Invert_RtR
+
+*******************************************************************************
+Thu Jun 13 18:54:50 2024
+
+
+FIT:    data read from "../data/convergenza_range/range_variabile_coulomb.csv" using 1:2
+        format = x:z
+        x range restricted to [0.00000 : 100.000]
+        #datapoints = 100
+        residuals are weighted equally (unit weight)
+
+function used for fitting: h(x)
+	h(x) = a+b*x**c
+fitted parameters initialized with current variable values
+
+
+Current data point
+=========================
+#               = 1 out of 100
+x               = -18            
+z               = -18.2146       
+
+Current set of parameters
+=========================
+a               = -18            
+b               = 1              
+d               = 1.001          
+
+BREAK: Undefined value during function evaluation
+
+*******************************************************************************
+Thu Jun 13 18:56:09 2024
+
+
+FIT:    data read from "../data/convergenza_range/range_variabile_coulomb.csv" using 1:2
+        format = x:z
+        x range restricted to [-20.0000 : 80.0000]
+        #datapoints = 81
+        residuals are weighted equally (unit weight)
+
+function used for fitting: h(x)
+	h(x) = a+b*x**c
+fitted parameters initialized with current variable values
+
+
+Current data point
+=========================
+#               = 1 out of 81
+x               = -18.88         
+z               = -18.2146       
+
+Current set of parameters
+=========================
+a               = -18.88         
+b               = 1              
+c               = -1             
+
+BREAK: Undefined value during function evaluation

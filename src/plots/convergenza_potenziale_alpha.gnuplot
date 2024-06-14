@@ -5,13 +5,14 @@ set title font ',36'
 
 set monochrome
 set key spacing 2 center right outside reverse Left title "αL"
-set xrange [0:15]
+set xrange [0.64:15]
 set format y "10^{%T}"
 
 set xtics 0,2
 set mxtics 2
 
 set logscale y
+set logscale x
 
 set title "Convergence on K-range"
 set ylabel 'σ_{rel}' font ',36'

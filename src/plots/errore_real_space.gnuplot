@@ -8,7 +8,6 @@ set key spacing 2 reverse Left
 
 set xrange [0:7]
 
-
 set logscale y
 
 set format y "10^{%T}"

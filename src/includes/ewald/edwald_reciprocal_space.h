@@ -9,6 +9,25 @@
 
 int _K_RANGE = 0;
 
+double complex compute_structural_factor(Particle *particles, int n_particles, Vec3 k)
+{
+    double complex structural_factor = 0;
+    for (size_t i = 0; i < n_particles; i++)
+    {
+        double qi = particles[i].charge;
+
+        Vec3 r_i = {
+            .x = particles[i].x,
+            .y = particles[i].y,
+            .z = particles[i].z,
+        };
+        double dot_prod = (k.x * r_i.x + k.y * r_i.y + k.z * r_i.z);
+        structural_factor += qi * cexp(I * dot_prod);
+    }
+
+    return structural_factor;
+}
+
 double reciprocal_space_coulomb_energy(System *s, double ALPHA)
 {
     if (ALPHA <= 0)
@@ -31,23 +50,15 @@ double reciprocal_space_coulomb_energy(System *s, double ALPHA)
                 // Ignore cell (0,0,0) in k-space
                 if (k_x == 0 && k_y == 0 && k_z == 0) continue;
 
-                double complex factor = 0;
-                for (size_t i = 0; i < s->n_particles; i++)
-                {
-                    qi = s->particles[i].charge;
+                Vec3 k = {
+                    .x = k_x * base_frequency,
+                    .y = k_y * base_frequency,
+                    .z = k_z * base_frequency,
+                };
 
-                    Vec3 r_i = {
-                        .x = s->particles[i].x,
-                        .y = s->particles[i].y,
-                        .z = s->particles[i].z,
-                    };
-                    double dot_prod = (k_x * r_i.x + k_y * r_i.y + k_z * r_i.z) * base_frequency;
-                    factor += qi * cexp(I * dot_prod);
-                }
-
-                double k_mod2 = (k_x * k_x + k_y * k_y + k_z * k_z) * (base_frequency * base_frequency);
-
-                sum += pow(cabs(factor), 2) * exp(-k_mod2 / (4 * ALPHA * ALPHA)) / k_mod2;
+                double k_mod2 = (k.x * k.x + k.y * k.y + k.z * k.z);
+                double complex structural_factor = compute_structural_factor(s->particles, s->n_particles, k);
+                sum += (structural_factor * conj(structural_factor)) * exp(-k_mod2 / (4 * ALPHA * ALPHA)) / k_mod2;
             }
         }
     }

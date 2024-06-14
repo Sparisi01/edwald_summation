@@ -15,4 +15,8 @@
 
 5. La componente di spazio reciproco non dipende da r, anche se la carica non è nulla nella scatola (0,0,0) posso ignorare il suo contributo.
 
-R.W. Hockney and J.W. Eastwood. Computer Simulation Using Particles. CRC Press, 1985.
+R.W. Hockney and J.W. Eastwood. Computer Simulation Using Particles. CRC Press, 1985.ù
+
+
+
+Grafico errore totale 

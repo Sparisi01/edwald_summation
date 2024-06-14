@@ -4,16 +4,19 @@
 #include "../constants.h"
 #include "../structures.h"
 #include "../utils/lattice.h"
+#include <inttypes.h>
 #include <math.h>
 #include <stdlib.h>
 
 double _CUTOFF = INFINITY;
+int _VERBOSE = 0;
 
 double real_space_coulomb_energy(System *s, double ALPHA)
 {
     if (ALPHA <= 0) goto ALPHA_ERROR;
     if (_CUTOFF <= 0) goto CUTOFF_ERROR;
 
+    int64_t skipped_for_truncation = 0;
     double energy_sum = 0;
     double qi, qj;
 
@@ -35,10 +38,9 @@ double real_space_coulomb_energy(System *s, double ALPHA)
             };
 
             // First image convention
-            // minimum_image_convention(&r_ij, s->cell_lenght);
-            r_ij.x = r_ij.x - rint(r_ij.x / s->cell_lenght) * s->cell_lenght;
-            r_ij.y = r_ij.y - rint(r_ij.y / s->cell_lenght) * s->cell_lenght;
-            r_ij.z = r_ij.z - rint(r_ij.z / s->cell_lenght) * s->cell_lenght;
+            r_ij.x = minimum_image(r_ij.x, s->cell_lenght);
+            r_ij.y = minimum_image(r_ij.y, s->cell_lenght);
+            r_ij.z = minimum_image(r_ij.z, s->cell_lenght);
 
             double r_ij_mod = sqrt(r_ij.x * r_ij.x + r_ij.y * r_ij.y + r_ij.z * r_ij.z);
 
@@ -46,10 +48,17 @@ double real_space_coulomb_energy(System *s, double ALPHA)
             if (r_ij_mod > _CUTOFF) continue;
             if (r_ij_mod == 0) goto PARTICLE_OVERLAP_ERROR;
 
+            double old_energy_sum = energy_sum;
             energy_sum += (qi * qj) * erfc(ALPHA * r_ij_mod) / r_ij_mod;
+
+            if (old_energy_sum == energy_sum && qi * qj != 0)
+            {
+                skipped_for_truncation += 1;
+            }
         }
     }
 
+    if (skipped_for_truncation != 0 && _VERBOSE == 1) printf("WARNING: %lld skipped for truncation\n", skipped_for_truncation);
     return energy_sum;
 
 PARTICLE_OVERLAP_ERROR:
