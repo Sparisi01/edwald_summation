@@ -12,7 +12,7 @@ int _N_PARTICLES = 10;
 double _DENSITY = 0.01;
 double _CELL_LENGHT = 1;
 double _SIGMA_VELOCITIES = 1.;
-int _MAX_RANGE = 100;
+int _MAX_RANGE = 50;
 
 typedef struct alpha_file
 {

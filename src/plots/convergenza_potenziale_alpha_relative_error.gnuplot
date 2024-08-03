@@ -1,18 +1,18 @@
-set terminal png size 1600,1200 enhanced font 'FiraCode,30' lw 2
+set terminal png size 1600,1200 enhanced font ',30' lw 2
 set output './png/convergenza_range.png'
 set datafile separator ";"
 set title font ',36'
 
 set monochrome
 set key spacing 2 center right outside reverse Left title "αL"
-set xrange [0.64:15]
+set xrange [1:30]
 set format y "10^{%T}"
 
-set xtics 0,2
+set xtics 1,2
 set mxtics 2
 
 set logscale y
-set logscale x
+
 
 set title "Convergence on K-range"
 set ylabel 'σ_{rel}' font ',36'
