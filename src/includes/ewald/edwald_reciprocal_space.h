@@ -7,7 +7,7 @@
 #include <math.h>
 #include <stdlib.h>
 
-int _K_RANGE = 0;
+int _K_RANGE_EWALD = 0;
 
 double complex compute_structural_factor(Particle *particles, int n_particles, Vec3 k)
 {
@@ -41,11 +41,11 @@ double reciprocal_space_coulomb_energy(System *s, double ALPHA)
     double qi, qj;
 
     double sum = 0;
-    for (int k_x = -_K_RANGE; k_x <= _K_RANGE; k_x++)
+    for (int k_x = -_K_RANGE_EWALD; k_x <= _K_RANGE_EWALD; k_x++)
     {
-        for (int k_y = -_K_RANGE; k_y <= _K_RANGE; k_y++)
+        for (int k_y = -_K_RANGE_EWALD; k_y <= _K_RANGE_EWALD; k_y++)
         {
-            for (int k_z = -_K_RANGE; k_z <= _K_RANGE; k_z++)
+            for (int k_z = -_K_RANGE_EWALD; k_z <= _K_RANGE_EWALD; k_z++)
             {
                 // Ignore cell (0,0,0) in k-space
                 if (k_x == 0 && k_y == 0 && k_z == 0) continue;

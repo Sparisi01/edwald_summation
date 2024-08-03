@@ -12,7 +12,8 @@ int _N_PARTICLES = 10;
 double _DENSITY = 0.01;
 double _CELL_LENGHT = 1;
 double _SIGMA_VELOCITIES = 1.;
-int _MAX_RANGE = 50;
+int _MAX_RECIPROCAL_RANGE = 50;
+int _MIN_RECIPROCAL_RANGE = 50;
 
 typedef struct alpha_file
 {
@@ -70,7 +71,8 @@ int main(int argc, char const *argv[])
 
     double last_pot;
 
-    _CUTOFF = _CELL_LENGHT / 2;
+    //_CUTOFF = _CELL_LENGHT / 2;
+    _R_RANGE_EWALD = 20;
 
     alpha_file config[7] = {
         {
@@ -112,13 +114,14 @@ int main(int argc, char const *argv[])
     {
         FILE *file_convergenza_edw = fopen(config[i].file, "w");
         if (!file_convergenza_edw) exit(EXIT_FAILURE);
-        _ALPHA = config[i].alpha / _CUTOFF;
+        //_ALPHA = config[i].alpha / _CUTOFF;
+        _ALPHA = config[i].alpha;
         last_pot = 0;
         printf("---------------------\n");
         printf("ALPHA: %lf\n", _ALPHA);
-        for (size_t j = 0; j < _MAX_RANGE; j++)
+        for (size_t j = _MIN_RECIPROCAL_RANGE; j <= _MAX_RECIPROCAL_RANGE; j++)
         {
-            _K_RANGE = j;
+            _K_RANGE_EWALD = j;
             double pot = ewald_energy(&system);
             double rel_error = fabs((last_pot - pot) / pot);
 
@@ -134,7 +137,7 @@ int main(int argc, char const *argv[])
     FILE *file_convergenza_coulomb = fopen("./data/convergenza_range/range_variabile_coulomb.csv", "w");
     last_pot = 0;
     printf("---------------------\n");
-    for (size_t i = 0; i < _MAX_RANGE; i++)
+    for (size_t i = _MIN_RECIPROCAL_RANGE; i <= _MAX_RECIPROCAL_RANGE; i++)
     {
         _R_RANGE = i;
         double pot = getCoulombPotential(&system);
