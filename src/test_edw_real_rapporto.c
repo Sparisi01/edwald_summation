@@ -62,7 +62,7 @@ int main(int argc, char const *argv[])
     printf("Total charge: %lf\n", charge_sum);
 
     _CUTOFF = _CELL_LENGHT;
-    _K_RANGE = 30;
+    _K_RANGE_EWALD = 30;
 
     double ALPHA_MAX = 15;
     double ALPHA_MIN = 0.5;

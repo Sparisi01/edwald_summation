@@ -8,12 +8,13 @@
 #include "includes/ewald/edwald.h"
 #include "includes/utils/statistic.h"
 
-int _N_PARTICLES = 10;
+int _N_PARTICLES = 500;
 double _DENSITY = 0.01;
 double _CELL_LENGHT = 1;
 double _SIGMA_VELOCITIES = 1.;
-int _MAX_RECIPROCAL_RANGE = 50;
-int _MIN_RECIPROCAL_RANGE = 50;
+
+int _MAX_RECIPROCAL_RANGE = 20;
+int _MIN_RECIPROCAL_RANGE = 0;
 
 typedef struct alpha_file
 {
@@ -60,7 +61,7 @@ int main(int argc, char const *argv[])
         system.particles[i].vz = randGauss(0, _SIGMA_VELOCITIES);
 
         system.particles[i].mass = 1;
-        system.particles[i].charge = (i % 2 == 0) ? 1 : -1;
+        system.particles[i].charge = (i % 2 == 0) ? 0.1 : -0.1;
         charge_sum += system.particles[i].charge;
     }
 
@@ -72,33 +73,28 @@ int main(int argc, char const *argv[])
     double last_pot;
 
     //_CUTOFF = _CELL_LENGHT / 2;
-    _R_RANGE_EWALD = 20;
+    _R_RANGE_EWALD = 0;
 
     alpha_file config[7] = {
         {
             .alpha = 1.,
             .file = "./data/convergenza_range/range_variabile_edw_1.csv",
-
         },
         {
             .alpha = 2.,
             .file = "./data/convergenza_range/range_variabile_edw_2.csv",
-
         },
         {
             .alpha = 3.5,
             .file = "./data/convergenza_range/range_variabile_edw_3_5.csv",
-
         },
         {
             .alpha = 5.,
             .file = "./data/convergenza_range/range_variabile_edw_5.csv",
-
         },
         {
             .alpha = 7.,
             .file = "./data/convergenza_range/range_variabile_edw_7.csv",
-
         },
         {
             .alpha = 9.,
@@ -115,19 +111,28 @@ int main(int argc, char const *argv[])
         FILE *file_convergenza_edw = fopen(config[i].file, "w");
         if (!file_convergenza_edw) exit(EXIT_FAILURE);
         //_ALPHA = config[i].alpha / _CUTOFF;
-        _ALPHA = config[i].alpha;
+
+        // It is usefull to rapresent aplha in units of _cell_length
+        _ALPHA = config[i].alpha / _CELL_LENGHT;
         last_pot = 0;
         printf("---------------------\n");
         printf("ALPHA: %lf\n", _ALPHA);
         for (size_t j = _MIN_RECIPROCAL_RANGE; j <= _MAX_RECIPROCAL_RANGE; j++)
         {
             _K_RANGE_EWALD = j;
-            double pot = ewald_energy(&system);
+            // double pot = ewald_energy(&system);
+
+            double short_range = real_space_coulomb_energy(&system, _ALPHA);
+            double long_range = reciprocal_space_coulomb_energy(&system, _ALPHA);
+            double self = self_coulomb_energy(&system, _ALPHA);
+
+            double pot = (short_range + long_range - self);
+
             double rel_error = fabs((last_pot - pot) / pot);
 
             fprintf(file_convergenza_edw, "%d;%.15E;%.15E\n", j, pot, rel_error);
 
-            printf("{ED, Range:%d, RelErr:%.3E}: %.10E\n", j, rel_error, pot);
+            printf("{ED, Range:%d, RelErr:%.3E, Real:%.3E, Rec:%.3E, Self:%.3E, TotEnergy:%.10E}\n", j, rel_error, short_range, long_range, self, pot);
             if (rel_error == 0) break;
             last_pot = pot;
         }

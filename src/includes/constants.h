@@ -6,6 +6,10 @@
 #define SQR_3 1.73205080757  // Square root of 3
 #define SQR_PI 1.77245385091 // Square root of PI
 
+#define TAU_S 3.6
+#define TAU_L 1.0
+#define TAU_RAPP (TAU_S / TAU_L)
+
 // Random seed for reproducibility
 #define RAND_SEED 1
 
