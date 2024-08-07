@@ -8,7 +8,7 @@
 #include "includes/ewald/edwald.h"
 #include "includes/utils/statistic.h"
 
-int _N_PARTICLES = 500;
+int _N_PARTICLES = 100;
 double _DENSITY = 0.01;
 double _CELL_LENGHT = 1;
 double _SIGMA_VELOCITIES = 1.;
@@ -72,7 +72,7 @@ int main(int argc, char const *argv[])
 
     double last_pot;
 
-    _CUTOFF = _CELL_LENGHT / 2;
+    _CUTOFF = 1 * (_CELL_LENGHT / 2);
 
     alpha_file config[7] = {
         {

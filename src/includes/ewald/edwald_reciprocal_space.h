@@ -38,7 +38,6 @@ double reciprocal_space_coulomb_energy(System *s, double ALPHA)
 
     // All reciprocal lattice frequencies are multiple of the base frequency 2π/L
     double base_frequency = (2 * PI / s->cell_lenght);
-    double qi, qj;
 
     double sum = 0;
     for (int k_x = -_K_RANGE_EWALD; k_x <= _K_RANGE_EWALD; k_x++)
