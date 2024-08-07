@@ -8,9 +8,10 @@
 #include <math.h>
 #include <stdlib.h>
 
-double _CUTOFF = INFINITY;
+double _CUTOFF = 10;
+int _R_RANGE_EWALD = 0;
 int _VERBOSE = 0;
-int _R_RANGE_EWALD = 0; // When set to 0 first image convention
+// int _R_RANGE_EWALD = 0; // When set to 0 first image convention
 
 // _R_RANGE_EWALD defines the rnage in real space, if _CUTOFF not  set to infinity it is applied
 // and the sum is on spheres and not squares.
@@ -19,6 +20,8 @@ int _R_RANGE_EWALD = 0; // When set to 0 first image convention
 
 double real_space_coulomb_energy(System *s, double ALPHA)
 {
+    _R_RANGE_EWALD = floor(_CUTOFF / (s->cell_lenght / 2)); // Set real range based on cutoff in real space
+    // int _R_RANGE_EWALD = 10;
     if (ALPHA <= 0) goto ALPHA_ERROR;
     if (_CUTOFF <= 0) goto CUTOFF_ERROR;
 

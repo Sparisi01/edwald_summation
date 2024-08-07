@@ -83,7 +83,11 @@ double optimizeParameter(double error, double cell_length, int N_particles, doub
     double rc = s / alpha;
     double kc = 2 * s * alpha;
 
-    printf("OPTIMIZED PARAMETERS: R_C = %.5E, N_C = %.5E", rc, ceil(kc / (2 * PI / cell_length)));
+    _ALPHA = alpha;
+    _CUTOFF = rc;
+    _K_RANGE_EWALD = ceil(kc / (2 * PI / cell_length));
+
+    printf("OPTIMIZED PARAMETERS: R_C = %.5E, N_C = %.5E\n", rc, ceil(kc / (2 * PI / cell_length)));
 }
 
 #endif

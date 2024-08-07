@@ -7,7 +7,7 @@
 #include <math.h>
 #include <stdlib.h>
 
-int _K_RANGE_EWALD = 0;
+int _K_RANGE_EWALD = 10;
 
 double complex compute_structural_factor(Particle *particles, int n_particles, Vec3 k)
 {

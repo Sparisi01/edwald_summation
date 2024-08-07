@@ -72,8 +72,7 @@ int main(int argc, char const *argv[])
 
     double last_pot;
 
-    //_CUTOFF = _CELL_LENGHT / 2;
-    _R_RANGE_EWALD = 0;
+    _CUTOFF = _CELL_LENGHT / 2;
 
     alpha_file config[7] = {
         {
