@@ -78,7 +78,7 @@ double optimizeParameter(double error, double cell_length, int N_particles, doub
 
     printf("ALPHA: %.5E\n", alpha);
 
-    double s = findSbybisection(1e-3, 1e3, error, Q, cell_length, alpha, 1e-16);
+    double s = findSbybisection(1e-3, 1e3, error, Q, cell_length, alpha, 1e-10);
 
     double rc = s / alpha;
     double kc = 2 * s * alpha;
@@ -87,7 +87,7 @@ double optimizeParameter(double error, double cell_length, int N_particles, doub
     _CUTOFF = rc;
     _K_RANGE_EWALD = ceil(kc / (2 * PI / cell_length));
 
-    printf("OPTIMIZED PARAMETERS: R_C = %.5E, N_C = %.5E\n", rc, ceil(kc / (2 * PI / cell_length)));
+    printf("OPTIMIZED PARAMETERS: R_C = %.5E, N_C = %.5E\n", rc, kc / (2 * PI / cell_length));
 }
 
 #endif

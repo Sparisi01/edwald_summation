@@ -46,6 +46,8 @@ double reciprocal_space_coulomb_energy(System *s, double ALPHA)
         {
             for (int k_z = -_K_RANGE_EWALD; k_z <= _K_RANGE_EWALD; k_z++)
             {
+                // K sphere
+                if (k_x * k_x + k_y * k_y + k_z * k_z > _K_RANGE_EWALD * _K_RANGE_EWALD) continue;
                 // Ignore cell (0,0,0) in k-space
                 if (k_x == 0 && k_y == 0 && k_z == 0) continue;
 

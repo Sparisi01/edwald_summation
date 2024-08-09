@@ -9,17 +9,23 @@
 #include "includes/ewald/edwald.h"
 #include "includes/utils/statistic.h"
 
-int _N_PARTICLES = 2000;
+int _N_PARTICLES = 100;
 double _CELL_LENGHT = 1;
 double _SIGMA_VELOCITIES = 1.;
 double _CHARGE = 1.;
 
 int main(int argc, char const *argv[])
 {
-    FILE *tempi_file = fopen("data/execution_times_file.csv", "w");
+    _ALPHA = 9;
+    _CUTOFF = 0.5;
+    _K_RANGE_EWALD = 12;
+
+    FILE *tempi_file = fopen("data/execution_times_file_square.csv", "w");
 
     System system;
-    for (size_t j = 40; j < 100; j++)
+    double pot2 = 0;
+
+    for (size_t j = 10; j < 70; j++)
     {
 
         _N_PARTICLES = 100 * j;
@@ -54,7 +60,7 @@ int main(int argc, char const *argv[])
 
         double Q = 1. * system.n_particles;
 
-        optimizeParameter(1e-2, _CELL_LENGHT, system.n_particles, Q);
+        // optimizeParameter(1e-3, _CELL_LENGHT, system.n_particles, Q);
 
         clock_t tic = clock();
 
@@ -66,8 +72,19 @@ int main(int argc, char const *argv[])
 
         double pot = (short_range + long_range - self);
 
+        // PLOT CORRETTO
+        /* _ALPHA = 9;
+        _CUTOFF = 2 * (_CELL_LENGHT / 2);
+        _K_RANGE_EWALD = 20;
+
+        short_range = real_space_coulomb_energy(&system, _ALPHA);
+        long_range = reciprocal_space_coulomb_energy(&system, _ALPHA);
+        self = self_coulomb_energy(&system, _ALPHA);
+
+        double pot2 = (short_range + long_range - self); */
+
         printf("{N: %d, Alpha: %.3E, nr: %d, nk: %d, Real:%.3E, Rec:%.3E, Self:%.3E, TotEnergy:%.10E}\n", system.n_particles, _ALPHA, _R_RANGE_EWALD, _K_RANGE_EWALD, short_range, long_range, self, pot);
-        fprintf(tempi_file, "%d;%f\n", system.n_particles, (double)(toc - tic));
+        fprintf(tempi_file, "%d;%f;%d;%f;%.5E\n", system.n_particles, _CUTOFF, _K_RANGE_EWALD, (double)(toc - tic), fabs(pot - pot2));
     }
 
     return 0;

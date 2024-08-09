@@ -72,7 +72,7 @@ int main(int argc, char const *argv[])
 
     double last_pot;
 
-    _CUTOFF = 1 * (_CELL_LENGHT / 2);
+    _CUTOFF = 5 * (_CELL_LENGHT / 2);
 
     alpha_file config[7] = {
         {
