@@ -8,12 +8,12 @@
 #include "includes/ewald/edwald.h"
 #include "includes/utils/statistic.h"
 
-int _N_PARTICLES = 100;
+int _N_PARTICLES = 20;
 double _DENSITY = 0.01;
 double _CELL_LENGHT = 1;
 double _SIGMA_VELOCITIES = 1.;
 
-int _MAX_RECIPROCAL_RANGE = 20;
+int _MAX_RECIPROCAL_RANGE = 15;
 int _MIN_RECIPROCAL_RANGE = 0;
 
 typedef struct alpha_file
@@ -72,13 +72,9 @@ int main(int argc, char const *argv[])
 
     double last_pot;
 
-    _CUTOFF = 5 * (_CELL_LENGHT / 2);
+    _CUTOFF = 5*(_CELL_LENGHT / 2);
 
-    alpha_file config[7] = {
-        {
-            .alpha = 1.,
-            .file = "./data/convergenza_range/range_variabile_edw_1.csv",
-        },
+    alpha_file config[6] = {
         {
             .alpha = 2.,
             .file = "./data/convergenza_range/range_variabile_edw_2.csv",
@@ -105,7 +101,7 @@ int main(int argc, char const *argv[])
         },
     };
 
-    for (size_t i = 0; i < 7; i++)
+    for (size_t i = 0; i < 6; i++)
     {
         FILE *file_convergenza_edw = fopen(config[i].file, "w");
         if (!file_convergenza_edw) exit(EXIT_FAILURE);
