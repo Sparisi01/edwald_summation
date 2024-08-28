@@ -20,12 +20,12 @@ int main(int argc, char const *argv[])
     _CUTOFF = 0.5;
     _K_RANGE_EWALD = 12;
 
-    FILE *tempi_file = fopen("data/execution_times_file_square.csv", "w");
+    FILE *tempi_file = fopen("data/execution_times_file.csv", "w");
 
     System system;
     double pot2 = 0;
 
-    for (size_t j = 10; j < 70; j++)
+    for (size_t j = 5; j < 100; j++)
     {
 
         _N_PARTICLES = 100 * j;
@@ -60,7 +60,7 @@ int main(int argc, char const *argv[])
 
         double Q = 1. * system.n_particles;
 
-        // optimizeParameter(1e-3, _CELL_LENGHT, system.n_particles, Q);
+        optimizeParameter(1e-3, _CELL_LENGHT, system.n_particles, Q);
 
         clock_t tic = clock();
 

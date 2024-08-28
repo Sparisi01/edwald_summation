@@ -7,7 +7,7 @@ set monochrome
 set key spacing 2 left reverse Left box
 
 set xrange [1.5:15]
-set yrange [-1.5:9]
+set yrange [-2:9]
 
 set xtics 0,1
 set mxtics 2
@@ -15,8 +15,10 @@ set mxtics 2
 set ytics -3,1
 set mytics 2
 
+set lmargin 7
+
 set title "Energy contributions as functions of alpha"
-set ylabel 'Energy per particle' font ',36'
+set ylabel 'Energy per particle [g cm^{2} s^{-2}]' font ',36'
 set xlabel 'αL' font ',36'
 set grid
 
