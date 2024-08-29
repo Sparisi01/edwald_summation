@@ -22,12 +22,11 @@ int main(int argc, char const *argv[])
 
     FILE *tempi_file = fopen("data/execution_times_file.csv", "w");
 
-    System system;
+    SystemV system;
     double pot2 = 0;
 
-    for (size_t j = 5; j < 100; j++)
+    for (size_t j = 5; j < 130; j++)
     {
-
         _N_PARTICLES = 100 * j;
 
         system.n_particles = _N_PARTICLES;
@@ -37,6 +36,14 @@ int main(int argc, char const *argv[])
         {
             perror("Error, malloc 'system.particles' returned NULL:");
             exit(EXIT_FAILURE);
+        }
+
+        system.VerletList = (VerletListBlock *)malloc(sizeof(VerletListBlock) * system.n_particles);
+
+        for (size_t i = 0; i < system.n_particles; i++)
+        {
+            system.VerletList[i].N = 0;
+            system.VerletList[i].particles = (Particle **)malloc(sizeof(Particle *) * system.n_particles);
         }
 
         //==>INITIALIZATION<==//
@@ -62,11 +69,36 @@ int main(int argc, char const *argv[])
 
         optimizeParameter(1e-3, _CELL_LENGHT, system.n_particles, Q);
 
+        // FILL VERLET LIST
+
+        for (size_t i = 0; i < system.n_particles; i++)
+        {
+            for (size_t k = 0; k < system.n_particles; k++)
+            {
+                if (k == j) continue;
+
+                Vec3 r_ij = {
+                    .x = system.particles[i].x - system.particles[k].x,
+                    .y = system.particles[i].y - system.particles[k].y,
+                    .z = system.particles[i].z - system.particles[k].z,
+                };
+
+                double r_ij_mod = sqrt(r_ij.x * r_ij.x + r_ij.y * r_ij.y + r_ij.z * r_ij.z);
+
+                // In first image convention _CUTOFF must be less than L/2
+                if (r_ij_mod < _CUTOFF)
+                {
+                    system.VerletList[i].N++;
+                    system.VerletList[i].particles[system.VerletList[i].N - 1] = &system.particles[k];
+                }
+            }
+        }
+
         clock_t tic = clock();
 
-        double short_range = real_space_coulomb_energy(&system, _ALPHA);
-        double long_range = reciprocal_space_coulomb_energy(&system, _ALPHA);
-        double self = self_coulomb_energy(&system, _ALPHA);
+        double short_range = real_space_coulomb_energyV(&system, _ALPHA);
+        double long_range = reciprocal_space_coulomb_energyV(&system, _ALPHA);
+        double self = self_coulomb_energyV(&system, _ALPHA);
 
         clock_t toc = clock();
 

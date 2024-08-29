@@ -22,11 +22,30 @@ double self_coulomb_energy(System *system, double ALPHA)
     return sum * ALPHA / SQR_PI;
 }
 
+double self_coulomb_energyV(SystemV *system, double ALPHA)
+{
+    double sum = 0;
+    for (size_t i = 0; i < system->n_particles; i++)
+    {
+        sum += pow(system->particles[i].charge, 2);
+    }
+    return sum * ALPHA / SQR_PI;
+}
+
 double ewald_energy(System *system)
 {
     double short_range = real_space_coulomb_energy(system, _ALPHA);
     double long_range = reciprocal_space_coulomb_energy(system, _ALPHA);
     double self = self_coulomb_energy(system, _ALPHA);
+
+    return (short_range + long_range - self);
+}
+
+double ewald_energy_verlet(SystemV *system)
+{
+    double short_range = real_space_coulomb_energyV(system, _ALPHA);
+    double long_range = reciprocal_space_coulomb_energyV(system, _ALPHA);
+    double self = self_coulomb_energyV(system, _ALPHA);
 
     return (short_range + long_range - self);
 }

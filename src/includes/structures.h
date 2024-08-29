@@ -33,11 +33,27 @@ typedef struct System
     struct Vec3 *forces;
 } System;
 
+typedef struct SystemV
+{
+    double time;
+    double cell_lenght;
+    int n_particles;
+    struct Particle *particles;
+    struct Vec3 *forces;
+    struct VerletListBlock *VerletList;
+} SystemV;
+
 typedef struct Observables
 {
     double temperature;
     double energy;
     double pressure;
 } Observables;
+
+typedef struct VerletListBlock
+{
+    int N;
+    struct Particle **particles;
+} VerletListBlock;
 
 #endif

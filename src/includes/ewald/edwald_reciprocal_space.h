@@ -203,9 +203,43 @@ ALPHA_ERROR:
     exit(EXIT_FAILURE);
 } */
 
-Vec3 *reciprocal_space_force()
+double reciprocal_space_coulomb_energyV(SystemV *s, double ALPHA)
 {
-    return NULL;
+    if (ALPHA <= 0)
+    {
+        printf("ERROR: ALPHA must be greater than 0");
+        exit(EXIT_FAILURE);
+    }
+
+    // All reciprocal lattice frequencies are multiple of the base frequency 2π/L
+    double base_frequency = (2 * PI / s->cell_lenght);
+
+    double sum = 0;
+    for (int k_x = -_K_RANGE_EWALD; k_x <= _K_RANGE_EWALD; k_x++)
+    {
+        for (int k_y = -_K_RANGE_EWALD; k_y <= _K_RANGE_EWALD; k_y++)
+        {
+            for (int k_z = -_K_RANGE_EWALD; k_z <= _K_RANGE_EWALD; k_z++)
+            {
+                // K sphere
+                if (k_x * k_x + k_y * k_y + k_z * k_z > _K_RANGE_EWALD * _K_RANGE_EWALD) continue;
+                // Ignore cell (0,0,0) in k-space
+                if (k_x == 0 && k_y == 0 && k_z == 0) continue;
+
+                Vec3 k = {
+                    .x = k_x * base_frequency,
+                    .y = k_y * base_frequency,
+                    .z = k_z * base_frequency,
+                };
+
+                double k_mod2 = (k.x * k.x + k.y * k.y + k.z * k.z);
+                double complex structural_factor = compute_structural_factor(s->particles, s->n_particles, k);
+                sum += (structural_factor * conj(structural_factor)) * exp(-k_mod2 / (4 * ALPHA * ALPHA)) / k_mod2;
+            }
+        }
+    }
+    double volume = pow(s->cell_lenght, 3);
+    return 0.5 * (4 * PI) / volume * sum;
 }
 
 #endif
