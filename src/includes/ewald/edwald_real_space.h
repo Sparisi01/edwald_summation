@@ -59,11 +59,14 @@ double real_space_coulomb_energy(System *s, double ALPHA)
                         r_ij.y = minimum_image(r_ij.y, s->cell_lenght) + r_y * s->cell_lenght;
                         r_ij.z = minimum_image(r_ij.z, s->cell_lenght) + r_z * s->cell_lenght;
 
-                        double r_ij_mod = sqrt(r_ij.x * r_ij.x + r_ij.y * r_ij.y + r_ij.z * r_ij.z);
+                        double r_ij_mod = r_ij.x * r_ij.x + r_ij.y * r_ij.y + r_ij.z * r_ij.z;
 
                         // In first image convention _CUTOFF must be less than L/2
-                        if (r_ij_mod > _CUTOFF) continue;
+                        if (r_ij_mod > _CUTOFF * _CUTOFF) continue;
                         if (r_ij_mod == 0) goto PARTICLE_OVERLAP_ERROR;
+
+                        // Avoid Sqrt if not needed
+                        r_ij_mod = sqrt(r_ij_mod);
 
                         double old_energy_sum = energy_sum;
                         energy_sum += (qi * qj) * erfc(ALPHA * r_ij_mod) / r_ij_mod;

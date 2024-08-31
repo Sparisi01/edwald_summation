@@ -25,9 +25,9 @@ int main(int argc, char const *argv[])
     SystemV system;
     double pot2 = 0;
 
-    for (size_t j = 5; j < 130; j++)
+    for (size_t j = 5; j < 60; j++)
     {
-        _N_PARTICLES = 100 * j;
+        _N_PARTICLES = 200 * j;
 
         system.n_particles = _N_PARTICLES;
         system.cell_lenght = _CELL_LENGHT;
@@ -82,6 +82,11 @@ int main(int argc, char const *argv[])
                     .y = system.particles[i].y - system.particles[k].y,
                     .z = system.particles[i].z - system.particles[k].z,
                 };
+
+                // First image convention
+                r_ij.x = minimum_image(r_ij.x, system.cell_lenght);
+                r_ij.y = minimum_image(r_ij.y, system.cell_lenght);
+                r_ij.z = minimum_image(r_ij.z, system.cell_lenght);
 
                 double r_ij_mod = sqrt(r_ij.x * r_ij.x + r_ij.y * r_ij.y + r_ij.z * r_ij.z);
 
